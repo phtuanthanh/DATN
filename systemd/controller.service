@@ -1,0 +1,15 @@
+[Unit]
+Description=CTF Game Server Submission
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/hades/AD/controller/
+ExecStart=/home/hades/AD/controller/controller -dbhost 10.10.16.30 -dbname ctf_db -dbuser hades -dbpassword Thanhloveliv2004@ -metrics-listen 0.0.0.0:9091 -nonstop
+Restart=on-failure
+User=root
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+

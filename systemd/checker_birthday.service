@@ -1,0 +1,14 @@
+[Unit]
+Description=CTF Game Server Checker
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/hades/AD/checker
+ExecStart=/home/hades/AD/checker/checker -dbhost 10.10.16.30 -dbname ctf_db -dbuser hades -dbpassword Thanhloveliv2004@ -flagsecret YWFhYWE= -checkerscript /home/hades/AD/script/script/birthday_gram/birthday_gram.py -service birthday -ippattern "192.168.199." -metrics-listen 0.0.0.0:9090 -loglevel INFO
+Restart=on-failure
+User=root
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

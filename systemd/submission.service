@@ -1,0 +1,13 @@
+[Unit]
+Description=CTF Game Server Submission
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/hades/AD/submission
+ExecStart=/home/hades/AD/submission/submission -dbhost 10.10.16.30 -dbname ctf_db -dbuser hades -dbpassword Thanhloveliv2004@ -flagsecret YWFhYWE= -listen 0.0.0.0:6666 -teamregex "192\\.168\\.199\\.(\\d+)" -metrics-listen 0.0.0.0:9092 -loglevel INFO
+Restart=on-failure
+User=root
+
+[Install]
+WantedBy=multi-user.target

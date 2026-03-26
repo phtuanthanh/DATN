@@ -18,15 +18,17 @@ class ExampleChecker(BaseChecker):
     def place_flag(self, tick):
         flag = get_flag(tick).encode()
         session = requests.session()
-        username = utils.generate_name()
-        password = utils.generate_password()
+        # Use fixed user for consistent flag placement
+        username = 'hades'
+        password = 'password'
 
-        # Register
+        # Register or get existing user
         try:
             utils.check_register(self, session, username, password)
         except Exception as e:
             logging.error("Register failed!\n" + str(e))
             return CheckResult.FAULTY
+
         # Login
         try:
             utils.check_login(self, session, username, password)
@@ -42,8 +44,30 @@ class ExampleChecker(BaseChecker):
         except Exception as e:
             logging.error("Uploading failed!\n" + str(e))
             return CheckResult.FAULTY
-        store_state(f"flag{tick}User",(session, username, password))
-        store_state(f"flag{tick}Image", flag_image)
+        
+        # Fetch the uploaded image back from server to verify and store exact server representation
+        try:
+            resp_text_orig = utils.get_view(self, session, username)
+            resp_text = resp_text_orig.split("<img")
+            if len(resp_text) < 3:
+                logging.error("Could not find uploaded image in view")
+                return CheckResult.FAULTY
+            
+            resp_text = resp_text[2].split("base64, ")
+            if len(resp_text) < 2:
+                logging.error("Could not find base64 image data")
+                return CheckResult.FAULTY
+            
+            resp_text = resp_text[1].split(" />")[0]
+            resp_text = resp_text.rstrip('"').encode("utf-8")
+            stored_image = base64.decodebytes(resp_text)
+            
+            # Store the image as the server returned it
+            store_state(f"flag{tick}Image", stored_image)
+        except Exception as e:
+            logging.error("Failed to verify uploaded image!\n" + str(e) + "\n" + traceback.format_exc())
+            return CheckResult.FAULTY
+        
         set_flagid(username)
         return CheckResult.OK
 
@@ -201,27 +225,41 @@ class ExampleChecker(BaseChecker):
         return CheckResult.OK
 
     def check_flag(self, tick):
-        user = load_state(f"flag{tick}User")
-        if not user:
-            return CheckResult.FLAG_NOT_FOUND
+        # Use fixed hades user
+        username = 'hades'
+        password = 'password'
+        
         try:
             session = requests.session()
-            utils.check_login(self, session, user[1], user[2])
-        except Exception as e:
-            logging.error("Login failed!\n" + str(e))
-            return CheckResult.FAULTY
-        try:
-            resp_text_orig = utils.get_view(self, user[0], user[1])
-            resp_text = resp_text_orig.split("<img")
-            resp_text = resp_text[2].split("base64, ")
-            resp_text = resp_text[1].split(" />")[0]
-            resp_text = resp_text[:-1].encode("utf-8")
-            img_bytes = base64.decodebytes(resp_text)
+            utils.check_login(self, session, username, password)
+            resp_text_orig = utils.get_view(self, session, username)
             flag_image = load_state(f"flag{tick}Image")
+            
+            if not flag_image:
+                logging.error(f"Flag image not found for tick {tick}")
+                return CheckResult.FLAG_NOT_FOUND
+            
+            # Extract image from HTML response (adjust parsing as needed)
+            resp_text = resp_text_orig.split("<img")
+            if len(resp_text) < 3:
+                logging.error("Invalid response structure - not enough img tags")
+                return CheckResult.FLAG_NOT_FOUND
+                
+            resp_text = resp_text[2].split("base64, ")
+            if len(resp_text) < 2:
+                logging.error("No base64 image data found")
+                return CheckResult.FLAG_NOT_FOUND
+                
+            resp_text = resp_text[1].split(" />")[0]
+            resp_text = resp_text.rstrip('"').encode("utf-8")
+            img_bytes = base64.decodebytes(resp_text)
+            print(img_bytes)
         except Exception as e:
-            logging.error("Failed to get checker view!\n" + str(e))
+            logging.error("Failed to get checker view!\n" + str(e) + "\n" + traceback.format_exc())
             return CheckResult.FLAG_NOT_FOUND
+            
         if img_bytes != flag_image:
+            logging.error(f"Image mismatch for tick {tick}")
             return CheckResult.FLAG_NOT_FOUND
         return CheckResult.OK
 

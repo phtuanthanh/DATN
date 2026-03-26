@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AD Challenge 2025 | Attack-Defense CTF</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <h1>AD Challenge 2025</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#results">Results</a></li>
+                <li><a href="#downloads">Downloads</a></li>
+                <li><a href="/auth/login" class="cta-btn">Sign In</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">
+                    <span class="gradient-text">AD Challenge 2025</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Attack-Defense CTF Competition
+                </p>
+                <p style="color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 2rem;">
+                    Attack-Defense Capture The Flag Competition
+                </p>
+                <div class="hero-buttons">
+                    <a href="/auth/login" class="btn btn-primary btn-large">Sign In</a>
+                    <a href="#about" class="btn btn-secondary btn-large">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="facts">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="title-line"></span>
+                Thông tin cuộc thi
+                <span class="title-line"></span>
+            </h2>
+
+            <div class="facts-grid">
+                <div class="fact-card">
+                    <div class="fact-icon">📅</div>
+                    <h3>Ngày thi</h3>
+                    <p>2025-03-22<br>Thứ 7</p>
+                </div>
+                <div class="fact-card">
+                    <div class="fact-icon">⏱️</div>
+                    <h3>Thời lượng</h3>
+                    <p>08:00 - 16:00 UTC<br>8 giờ liên tục</p>
+                </div>
+                <div class="fact-card">
+                    <div class="fact-icon">🛡️</div>
+                    <h3>Dịch vụ</h3>
+                    <p>12 dịch vụ khác nhau<br>Lỗ hổng đa dạng</p>
+                </div>
+                <div class="fact-card">
+                    <div class="fact-icon">👥</div>
+                    <h3>Đội chơi</h3>
+                    <p>28 đội tham gia<br>~ 120 người chơi</p>
+                </div>
+                <div class="fact-card">
+                    <div class="fact-icon">🎯</div>
+                    <h3>Format</h3>
+                    <p>Attack-Defense CTF<br>Tấn công & Phòng chống</p>
+                </div>
+                <div class="fact-card">
+                    <div class="fact-icon">🏆</div>
+                    <h3>Giải thưởng</h3>
+                    <p>Top 3 đội có tiền<br>Bonus exploit đầu</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section id="results" class="results">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="title-line"></span>
+                Kết quả cuộc thi
+                <span class="title-line"></span>
+            </h2>
+
+            <div class="results-container">
+                <div class="podium">
+                    <div class="podium-place second">
+                        <div class="medal">🥈</div>
+                        <h4>Hạng 2</h4>
+                        <p class="team-name">HCMUS Capture</p>
+                        <p class="score">14,280 pts</p>
+                    </div>
+                    <div class="podium-place first">
+                        <div class="medal crown">👑</div>
+                        <h4>Hạng 1</h4>
+                        <p class="team-name">USTH Hackers</p>
+                        <p class="score">15,650 pts</p>
+                    </div>
+                    <div class="podium-place third">
+                        <div class="medal">🥉</div>
+                        <h4>Hạng 3</h4>
+                        <p class="team-name">UIT Red Hats</p>
+                        <p class="score">13,920 pts</p>
+                    </div>
+                </div>
+
+                <div class="leaderboard">
+                    <h3>Top 10 Leaderboard</h3>
+                    <table class="rank-table">
+                        <thead>
+                            <tr>
+                                <th>Xếp hạng</th>
+                                <th>Đội</th>
+                                <th>Điểm</th>
+                                <th>Cờ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="rank-gold">
+                                <td>1</td>
+                                <td>USTH Hackers</td>
+                                <td>15,650</td>
+                                <td>44</td>
+                            </tr>
+                            <tr class="rank-silver">
+                                <td>2</td>
+                                <td>HCMUS Capture</td>
+                                <td>14,280</td>
+                                <td>41</td>
+                            </tr>
+                            <tr class="rank-bronze">
+                                <td>3</td>
+                                <td>UIT Red Hats</td>
+                                <td>13,920</td>
+                                <td>39</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>NTU CyberTeam</td>
+                                <td>12,540</td>
+                                <td>36</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>VNU Security</td>
+                                <td>11,890</td>
+                                <td>33</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>FPT Exploit</td>
+                                <td>10,670</td>
+                                <td>30</td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td>PTIT Phantom</td>
+                                <td>9,450</td>
+                                <td>27</td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td>BUH Students</td>
+                                <td>8,920</td>
+                                <td>25</td>
+                            </tr>
+                            <tr>
+                                <td>9</td>
+                                <td>SaiGon IT</td>
+                                <td>7,680</td>
+                                <td>22</td>
+                            </tr>
+                            <tr>
+                                <td>10</td>
+                                <td>Tech Warriors</td>
+                                <td>6,450</td>
+                                <td>18</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Downloads Section -->
+    <section id="downloads" class="news">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="title-line"></span>
+                Tải xuống & Thông tin
+                <span class="title-line"></span>
+            </h2>
+
+            <div class="news-grid">
+                <div class="news-card">
+                    <div class="news-date">Vulnbox Images</div>
+                    <h3 class="news-title">Vulnbox - Hệ thống thi</h3>
+                    <p class="news-content">
+                        Máy ảo chứa tất cả dịch vụ cần bảo vệ trong cuộc thi. Sẵn sàng để deploy lên VirtualBox, KVM
+                        hoặc cloud.
+                    </p>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a href="#" class="download-btn">OVA</a>
+                        <a href="#" class="download-btn">QCOW2</a>
+                        <a href="#" class="download-btn">SHA256</a>
+                    </div>
+                </div>
+
+                <div class="news-card">
+                    <div class="news-date">Testbox Images</div>
+                    <h3 class="news-title">Testbox - Luyện tập</h3>
+                    <p class="news-content">
+                        Phiên bản test để luyện tập. Cùng dịch vụ như vulnbox nhưng dùng để test setup trước ngày thi
+                        chính thức.
+                    </p>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a href="#" class="download-btn">OVA</a>
+                        <a href="#" class="download-btn">QCOW2</a>
+                        <a href="#" class="download-btn">SHA256</a>
+                    </div>
+                </div>
+
+                <div class="news-card">
+                    <div class="news-date">Credentials</div>
+                    <h3 class="news-title">Password & Mã hóa</h3>
+                    <p class="news-content">
+                        <strong>Testbox password:</strong> <code
+                            style="background: rgba(0,212,255,0.1); padding: 2px 6px; border-radius: 3px;">test</code>
+                        <br><br>
+                        <strong>Vulnbox decryption key:</strong>
+                    </p>
+                    <div
+                        style="background: rgba(0,212,255,0.05); border-left: 3px solid var(--primary-color); padding: 1rem; margin-top: 1rem; border-radius: 4px; font-family: monospace; font-size: 0.85rem; word-break: break-all; color: var(--text-secondary);">
+                        H4ppy_B1r7hd4y_F4U57C7F_10_y34r5_g0_by_qu1ckly
+                    </div>
+                    <a href="#" class="read-more" style="margin-top: 1rem;">Chi tiết setup →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Description Section -->
+    <section class="statistics">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="title-line"></span>
+                Về cuộc thi
+                <span class="title-line"></span>
+            </h2>
+
+            <div
+                style="background: var(--card-bg); padding: 2rem; border-radius: 15px; border: 1px solid var(--border-color); line-height: 1.8; color: var(--text-secondary);">
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">AD Challenge 2025</h3>
+                <p>
+                    AD Challenge là một cuộc thi Capture The Flag định dạng Attack-Defense được tổ chức hàng năm.
+                    Đây là sân chơi dành cho những ai đam mê bảo mật thông tin và muốn thử sức trong các tình huống tấn
+                    công-phòng chống thực tế.
+                </p>
+                <p style="margin-top: 1rem;">
+                    <strong>Trong cuộc thi này:</strong>
+                </p>
+                <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+                    <li>Mỗi đội được cấp một Vulnbox - máy ảo chứa các dịch vụ có lỗ hổng bảo mật</li>
+                    <li>Đội cần bảo vệ dịch vụ của mình khỏi tấn công từ các đội khác</li>
+                    <li>Đạo quân tấn công để chiếm cờ (flags) từ dịch vụ của các đội khác</li>
+                    <li>Điểm được tính dựa trên những cờ mà đội giành được và dịch vụ được bảo vệ</li>
+                </ul>
+                <p style="margin-top: 1rem;">
+                    Cuộc thi kéo dài 8 giờ liên tục, yêu cầu sự phối hợp tốt giữa thành viên, kiến thức về exploit,
+                    patch lỗ hổng và chiến lược quân sự trong không gian mạng.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>AD Challenge 2025</h4>
+                    <p>Attack-Defense CTF Competition</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Liên kết nhanh</h4>
+                    <ul>
+                        <li><a href="#about">Về cuộc thi</a></li>
+                        <li><a href="#downloads">Tải xuống</a></li>
+                        <li><a href="#results">Kết quả</a></li>
+                        <li><a href="/auth/login">Đăng nhập</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Tài liệu</h4>
+                    <ul>
+                        <li><a href="#">Hướng dẫn setup</a></li>
+                        <li><a href="#">Quy tắc</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Liên hệ</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 AD Challenge. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+</body>
+
+</html>

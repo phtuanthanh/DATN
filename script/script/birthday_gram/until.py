@@ -60,7 +60,7 @@ def post_comment(self, session, image_num, comment):
 
 def check_register(self, session, username, password):
   resp = session.post(f"http://{self.ip}:3000/auth/register", data={"username" : username, "password": password})
-  if resp.status_code != 200:
+  if resp.status_code != 200 and resp.status_code != 400:
     raise ValueError(f"- Status Code: {resp.status_code}\n- Username: {username}\n- Password: {password}\n- User Url: http//{self.ip}:3000/view/{username}\n- Resp Text: {resp.text}")
 
 def check_login(self, session, username, password):

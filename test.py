@@ -79,7 +79,7 @@ def extract_flag_from_base64(base64_string):
                 flag = flag[2:]
             if flag.endswith("'"):
                 flag = flag[:-1]
-            
+            print("HIHI")
             print(f"[+] Flag extracted (cleaned): {flag}", flush=True)
             print(f"[+] Flag length: {len(flag)}", flush=True)
             

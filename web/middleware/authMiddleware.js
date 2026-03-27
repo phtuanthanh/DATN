@@ -48,21 +48,21 @@ const authMiddleware = (req, res, next) => {
   try {
     // Lấy token từ cookie hoặc header Authorization
     let token = req.cookies.authToken;
-    
+
     if (!token && req.headers.authorization) {
       const authHeader = req.headers.authorization;
       token = authHeader.startsWith('Bearer ')
         ? authHeader.slice(7)
         : authHeader;
     }
-    
+
     if (!token) {
       return res.redirect('/auth/login');
     }
 
     // Giải mã token
     const decoded = verifyToken(token);
-    
+
     // Lưu thông tin user vào request object để dùng ở các middleware/route tiếp theo
     req.user = decoded;
     req.token = token;
@@ -73,7 +73,7 @@ const authMiddleware = (req, res, next) => {
       res.clearCookie('authToken');
       return res.redirect('/auth/login');
     }
-    
+
     if (error.name === 'JsonWebTokenError') {
       res.clearCookie('authToken');
       return res.redirect('/auth/login');
@@ -89,10 +89,16 @@ const authMiddleware = (req, res, next) => {
  */
 const optionalAuthMiddleware = (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-    
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.slice(7);
+    // Check cookie first, then Authorization header
+    let token = req.cookies.authToken;
+
+    if (!token && req.headers.authorization) {
+      token = req.headers.authorization.startsWith('Bearer ')
+        ? req.headers.authorization.slice(7)
+        : req.headers.authorization;
+    }
+
+    if (token) {
       try {
         const decoded = verifyToken(token);
         req.user = decoded;
@@ -102,7 +108,7 @@ const optionalAuthMiddleware = (req, res, next) => {
         console.warn('Token không hợp lệ nhưng tiếp tục xử lý');
       }
     }
-    
+
     next();
   } catch (error) {
     next();

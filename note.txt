@@ -1,0 +1,7 @@
+Sửa lại  phần task bar đưa ảnh avatar lên như là một button để chỉ về user và tên của user có mộtk nút bấm xuống thì sẽ có profile và team. Thêm Scoreboard VPNstatus status serivces 
+
+Sửa phần edit, với user chỉ cho sửa ảnh và fullname, với teams ảnh tên, contry educcation
+
+Sửa phần up ảnh, xóa ảnh  cũ trên  ổ đĩa upload ảnh mới lên, chèn path ảnh mới trong database
+
+Sửa lại trang home, giống trang ngoài nhưng sẽ chứa thông tin của cuộc thi hiện tại

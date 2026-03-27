@@ -2,218 +2,101 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const os = require('os');
-const { authMiddleware } = require('../middleware/authMiddleware');
-const { User, Team } = require('../models');
-const userServices = require('../services/userServices');
+const { authMiddleware, optionalAuthMiddleware } = require('../middleware/authMiddleware');
+const userController = require('../controller/userController');
 const router = express.Router();
 
 /**
- * Multer configuration for profile updates
+ * Multer configuration for profile updates - use memory storage to avoid disk I/O delays
  */
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, os.tmpdir());
-    },
-    filename: (req, file, cb) => {
-        const timestamp = Date.now();
-        const random = Math.random().toString(36).substring(2, 8);
-        cb(null, `avatar-${timestamp}-${random}`);
+const storage = multer.memoryStorage();
+
+// File filter for early validation - REJECT IMMEDIATELY with error
+const fileFilter = (req, file, cb) => {
+    const ALLOWED_MIMES = {
+        'image/jpeg': true,
+        'image/png': true,
+        'image/gif': true,
+        'image/webp': true
+    };
+
+    // Check MIME type first
+    if (!ALLOWED_MIMES[file.mimetype]) {
+        return cb(new Error(`Invalid file type: ${file.mimetype}. Only JPG, PNG, GIF, WebP allowed`));
     }
-});
+
+    cb(null, true); // Accept file
+};
 
 const upload = multer({
     storage: storage,
+    fileFilter: fileFilter,
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
+        fileSize: 5 * 1024 * 1024 // 5MB limit - Multer will enforce this
     }
 });
 
-router.get('/dashboard', authMiddleware, async (req, res) => {
-    try {
-        // Get current user from token
-        const user = await User.findByPk(req.user.id);
-        
-        if (!user) {
-            return res.redirect('/auth/login');
-        }
+/**
+ * Pre-validation middleware - check Content-Length BEFORE Multer processes
+ * Rejects oversized requests immediately without buffering
+ */
+const validateContentLength = (req, res, next) => {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const contentLength = parseInt(req.headers['content-length']) || 0;
 
-        let userTeam = null;
-        let teamMembers = [];
-        let userTeamName = null;
-
-        // If user is part of a team, fetch team and members
-        if (user.teamId) {
-            userTeam = await Team.findByPk(user.teamId);
-            if (userTeam) {
-                    userTeamName = userTeam.name;
-                    teamMembers = await User.findAll({
-                        where: { teamId: user.teamId },
-                    attributes: ['id', 'username', 'email', 'fullName', 'isActive', 'createdAt']
-                });
-            }
-        }
-
-        res.render('dashboard', {
-            user: user.dataValues,
-            userTeam: userTeam ? userTeam.dataValues : null,
-            userTeamName: userTeamName,
-            teamMembers: teamMembers.map(m => m.dataValues)
+    if (contentLength > maxSize) {
+        return res.status(400).render('error', {
+            code: '400',
+            title: 'File Upload Error',
+            message: `File too large: ${(contentLength / 1024 / 1024).toFixed(2)}MB. Maximum 5MB allowed`
         });
-    } catch (error) {
-        console.error('Dashboard error:', error);
-        res.redirect('/auth/login');
     }
+    next();
+};
+
+/**
+ * POST /profile/update - Update user profile
+ */
+router.post('/profile/update', authMiddleware, validateContentLength, (req, res, next) => {
+    upload.single('avatar')(req, res, (err) => {
+        // Catch Multer errors immediately and return error page
+        if (err) {
+            const errorMessage = err.message || 'File upload error';
+            return res.status(400).render('error', {
+                code: '400',
+                title: 'File Upload Error',
+                message: errorMessage
+            });
+        }
+        next();
+    });
+}, userController.updateProfile);
+
+/**
+ * GET /dashboard - Redirect to home (unified landing page)
+ */
+router.get('/dashboard', (req, res) => {
+    res.redirect('/');
 });
 
 /**
  * GET /profile - Display user profile
  */
-router.get('/profile', authMiddleware, async (req, res) => {
-    try {
-        const user = await User.findByPk(req.user.id);
-        
-        if (!user) {
-            return res.redirect('/auth/login');
-        }
-
-        let userTeamName = null;
-
-        // If user is part of a team, fetch team name
-        if (user.teamId) {
-            const userTeam = await Team.findByPk(user.teamId);
-            if (userTeam) {
-                userTeamName = userTeam.name;
-            }
-        }
-
-        res.render('profile', {
-            user: user.dataValues,
-            userTeamName: userTeamName
-        });
-    } catch (error) {
-        console.error('Profile page error:', error);
-        res.redirect('/dashboard');
-    }
-});
+router.get('/profile', authMiddleware, userController.getProfile);
 
 /**
  * GET /scoreboard - Display scoreboard
  */
-router.get('/scoreboard', authMiddleware, async (req, res) => {
-    try {
-        res.render('scoreboard');
-    } catch (error) {
-        console.error('Scoreboard page error:', error);
-        res.redirect('/dashboard');
-    }
-});
+router.get('/scoreboard', authMiddleware, userController.getScoreboard);
 
 /**
  * GET /vpn - Display VPN status
  */
-router.get('/vpn', authMiddleware, async (req, res) => {
-    try {
-        res.render('vpn');
-    } catch (error) {
-        console.error('VPN page error:', error);
-        res.redirect('/dashboard');
-    }
-});
+router.get('/vpn', authMiddleware, userController.getVpn);
 
 /**
- * POST /profile/update - Update user profile information
+ * GET /services - Display services
  */
-router.post('/profile/update', authMiddleware, upload.single('avatar'), async (req, res) => {
-    try {
-        const user = await User.findByPk(req.user.id);
-        
-        if (!user) {
-            return res.redirect('/auth/login');
-        }
-
-        const { email, fullName } = req.body;
-        let avatarPath = null;
-        let updateError = null;
-
-        // Handle avatar upload if file is provided
-        if (req.file) {
-            const uploadResult = userServices.handleAvatarUpload(req.file);
-            
-            if (uploadResult.success) {
-                avatarPath = uploadResult.path;
-            } else {
-                updateError = uploadResult.error;
-            }
-        }
-
-        // If avatar upload failed, return error
-        if (updateError) {
-            let userTeamName = null;
-            if (user.teamId) {
-                const userTeam = await Team.findByPk(user.teamId);
-                if (userTeam) {
-                    userTeamName = userTeam.name;
-                }
-            }
-
-            return res.render('profile', {
-                user: user.dataValues,
-                userTeamName: userTeamName,
-                errorMessage: `Avatar upload failed: ${updateError}`
-            });
-        }
-
-        // Update user profile
-        if (email) {
-            user.email = email;
-        }
-
-        if (fullName) {
-            user.fullName = fullName;
-        }
-
-        if (avatarPath) {
-            user.profilePicture = avatarPath;
-        }
-
-        await user.save();
-
-        // Fetch team info for response
-        let userTeamName = null;
-        if (user.teamId) {
-            const userTeam = await Team.findByPk(user.teamId);
-            if (userTeam) {
-                userTeamName = userTeam.name;
-            }
-        }
-
-        res.render('profile', {
-            user: user.dataValues,
-            userTeamName: userTeamName,
-            successMessage: '✓ Profile updated successfully!'
-        });
-    } catch (error) {
-        console.error('Profile update error:', error);
-        
-        try {
-            const user = await User.findByPk(req.user.id);
-            let userTeamName = null;
-            if (user && user.teamId) {
-                const userTeam = await Team.findByPk(user.teamId);
-                if (userTeam) {
-                    userTeamName = userTeam.name;
-                }
-            }
-
-            return res.render('profile', {
-                user: user ? user.dataValues : {},
-                userTeamName: userTeamName,
-                errorMessage: 'Failed to update profile'
-            });
-        } catch (err) {
-            res.redirect('/profile');
-        }
-    }
-});
+router.get('/services', authMiddleware, userController.getServices);
 
 module.exports = router;

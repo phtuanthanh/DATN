@@ -36,10 +36,17 @@ const MAGIC_BYTES = {
  */
 const verifyMagicBytes = (filePath, mimeType) => {
     try {
-        const buffer = Buffer.alloc(4);
-        const fd = fs.openSync(filePath, 'r');
-        fs.readSync(fd, buffer, 0, 4, 0);
-        fs.closeSync(fd);
+        let buffer = Buffer.alloc(4);
+
+        if (Buffer.isBuffer(filePath)) {
+            // It's already a buffer (from memory storage)
+            buffer = filePath.slice(0, 4);
+        } else {
+            // It's a file path - read from disk
+            const fd = fs.openSync(filePath, 'r');
+            fs.readSync(fd, buffer, 0, 4, 0);
+            fs.closeSync(fd);
+        }
 
         const magicBytes = MAGIC_BYTES[mimeType];
         if (!magicBytes) return false;
@@ -70,12 +77,21 @@ const sanitizeFilename = (originalFilename) => {
     return `${timestamp}-${randomBytes}${ext}`;
 };
 
+/**
+ * Prevent path traversal attacks using relative path checking
+ * @param {string} baseDir - Base upload directory (absolute path)
+ * @param {string} uploadPath - Path to check (absolute path)
+ * @returns {boolean} - True if path is safe and within baseDir
+ */
 const isPathSafe = (baseDir, uploadPath) => {
-    const resolvedBase = path.resolve(baseDir);
-    const resolvedPath = path.resolve(uploadPath);
+    const resolvedBase = path.normalize(path.resolve(baseDir));
+    const resolvedPath = path.normalize(path.resolve(uploadPath));
 
+    // File path must be within base directory (not parent or sibling)
+    const relative = path.relative(resolvedBase, resolvedPath);
 
-    return resolvedPath.startsWith(resolvedBase + path.sep) || resolvedPath === resolvedBase;
+    // If relative path starts with '..' it's trying to escape baseDir
+    return !relative.startsWith('..') && !path.isAbsolute(relative);
 };
 const validateUploadFile = (file, uploadDir) => {
     // Check file exists
@@ -129,7 +145,9 @@ const validateUploadFile = (file, uploadDir) => {
     }
 
     // Verify magic bytes (actual file signature)
-    if (!verifyMagicBytes(file.path, file.mimetype)) {
+    // Support both file.path (disk storage) and file.buffer (memory storage)
+    const fileSource = file.buffer || file.path;
+    if (!verifyMagicBytes(fileSource, file.mimetype)) {
         return {
             valid: false,
             error: 'File content does not match declared MIME type (possible disguised file)'

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Scoreboard - AD Challenge</title>
+    <title>Services - AD Challenge</title>
     <link rel="stylesheet" href="/css/style.css">
     <style>
         * {
@@ -202,7 +202,6 @@
             color: #00d4ff;
             text-decoration: none;
             border-radius: 5px;
-            cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 500;
         }
@@ -211,20 +210,11 @@
             background: rgba(0, 212, 255, 0.1);
         }
 
-        .btn-nav.btn-primary {
-            background: #00d4ff;
-            color: #0a0e27;
-        }
-
-        .btn-nav.btn-primary:hover {
-            background: #00b8d4;
-        }
-
         /* Card Styles */
         .card {
             background: linear-gradient(135deg, #1a1f3a 0%, #0f1321 100%);
-            border: 1px solid #2a3f5f;
-            border-radius: 8px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
             padding: 2rem;
             margin-bottom: 2rem;
         }
@@ -322,21 +312,23 @@
 
     <div class="page-container">
         <div class="page-header">
-            <h1>🏆 Scoreboard</h1>
+            <h1>⚙️ Services</h1>
             <div class="page-nav">
                 <a href="/dashboard" class="btn-nav">← Back to Dashboard</a>
             </div>
         </div>
 
         <div class="card">
+            <div class="card-title">📋 Available Services</div>
             <div class="empty-state">
-                <div class="coming-soon-icon">🏆</div>
-                <p>Scoreboard Coming Soon</p>
-                <p style="font-size: 0.9rem; color: #808080;">We're working on bringing you the exciting scoreboard
+                <div class="coming-soon-icon">⚙️</div>
+                <p>Services Coming Soon</p>
+                <p style="font-size: 0.9rem; color: #808080;">We're working on bringing you the services management
                     feature. Stay tuned!</p>
             </div>
         </div>
     </div>
+
     <script>
         function toggleDropdown() {
             const dropdown = document.getElementById('userDropdown');

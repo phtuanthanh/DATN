@@ -68,7 +68,7 @@ const comparePassword = async (password, hashedPassword) => {
     }
 };
 
-const handleAvatarUpload = (file) => {
+const handleAvatarUpload = (file, oldAvatarPath) => {
     if (!file) {
         return {
             success: false,
@@ -89,11 +89,6 @@ const handleAvatarUpload = (file) => {
                 size: file.size
             });
 
-            // Clean up temp file
-            if (fs.existsSync(file.path)) {
-                fs.unlinkSync(file.path);
-            }
-
             return {
                 success: false,
                 error: validation.error
@@ -104,17 +99,49 @@ const handleAvatarUpload = (file) => {
         const safeFilename = validation.filename;
         const destPath = path.join(UPLOAD_DIR, safeFilename);
 
-        // Step 5: Move file from temp location to final destination
-        const moveSuccess = fileValidator.moveUploadedFile(file.path, destPath);
-
-        if (!moveSuccess) {
+        // Step 5: Write file from buffer (memory storage) or move from temp path (disk storage)
+        if (file.buffer) {
+            // Memory storage - write buffer directly
+            try {
+                const dir = path.dirname(destPath);
+                if (!fs.existsSync(dir)) {
+                    fs.mkdirSync(dir, { recursive: true, mode: 0o755 });
+                }
+                fs.writeFileSync(destPath, file.buffer, { mode: 0o644 });
+            } catch (error) {
+                return {
+                    success: false,
+                    error: 'Failed to save file'
+                };
+            }
+        } else if (file.path) {
+            // Disk storage - move file from temp location
+            const moveSuccess = fileValidator.moveUploadedFile(file.path, destPath);
+            if (!moveSuccess) {
+                return {
+                    success: false,
+                    error: 'Failed to save file'
+                };
+            }
+        } else {
             return {
                 success: false,
-                error: 'Failed to save file'
+                error: 'Invalid file storage format'
             };
         }
 
-        // Step 6: Return safe public path
+        // Step 6: Delete old avatar if it exists using safe deletion function
+        if (oldAvatarPath) {
+            const deleteSuccess = fileValidator.deleteUploadedFile(UPLOAD_DIR, oldAvatarPath);
+            if (deleteSuccess) {
+                console.log(`Old avatar deleted successfully`);
+            } else {
+                console.warn(`Could not delete old avatar: ${oldAvatarPath}`);
+                // Continue with upload even if delete fails
+            }
+        }
+
+        // Step 7: Return safe public path
         const publicPath = `/uploads/avatars/${safeFilename}`;
 
         return {

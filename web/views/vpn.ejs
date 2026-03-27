@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>VPN Status - AD Challenge</title>
     <link rel="stylesheet" href="/css/style.css">
@@ -68,6 +69,106 @@
         .navbar-menu a.active {
             color: #00d4ff;
             border-bottom: 2px solid #00d4ff;
+        }
+
+        /* User Avatar Dropdown */
+        .user-dropdown {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .user-info:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00d4ff;
+        }
+
+        .avatar-initial {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9rem;
+            border: 2px solid #00d4ff;
+            flex-shrink: 0;
+        }
+
+        .user-name {
+            color: #e0e0e0;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: linear-gradient(135deg, #1a1f3a 0%, #0f1321 100%);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            min-width: 200px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-menu.active {
+            display: flex;
+        }
+
+        .dropdown-item {
+            padding: 1rem 1.5rem;
+            color: #b0b0b0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            padding-left: 2rem;
+        }
+
+        .dropdown-item.logout {
+            color: #ff4757;
+        }
+
+        .dropdown-item.logout:hover {
+            background: rgba(255, 71, 87, 0.1);
+            color: #ff6b7a;
         }
 
         .page-container {
@@ -172,6 +273,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
@@ -180,14 +282,41 @@
                 <span>🎯</span>
                 <span>AD Challenge</span>
             </a>
-            <ul class="navbar-menu">
-                <li><a href="/dashboard">🏠 Home</a></li>
-                <li><a href="/profile">👤 Profile</a></li>
-                <li><a href="/team">👥 Team</a></li>
-                <li><a href="/scoreboard">🏆 Scoreboard</a></li>
-                <li><a href="/vpn" class="active">🔒 VPN Status</a></li>
-                <li><a href="/auth/logout" style="color: #ff4757;">🚪 Logout</a></li>
-            </ul>
+            <div class="user-dropdown">
+                <ul class="navbar-menu">
+                    <li><a href="/dashboard">🏠 Home</a></li>
+                    <li><a href="/scoreboard">🏆 Scoreboard</a></li>
+                    <li><a href="/vpn">🔒 VPN Status</a></li>
+                    <li><a href="/services">⚙️ Services</a></li>
+                </ul>
+                <div class="user-info" onclick="toggleDropdown()">
+                    <% if (user.avatar) { %>
+                        <img src="<%= user.avatar %>" alt="Avatar" class="avatar-small">
+                        <% } else { %>
+                            <div class="avatar-initial">
+                                <%= user.fullName.charAt(0).toUpperCase() %>
+                            </div>
+                            <% } %>
+                                <span class="user-name">
+                                    <%= user.fullName %>
+                                </span>
+                                <span style="color: #b0b0b0;">▼</span>
+                </div>
+                <div class="dropdown-menu" id="userDropdown">
+                    <a href="/profile" class="dropdown-item">
+                        <span>👤</span>
+                        <span>Profile</span>
+                    </a>
+                    <a href="/team" class="dropdown-item">
+                        <span>👥</span>
+                        <span>Team</span>
+                    </a>
+                    <a href="/auth/logout" class="dropdown-item logout">
+                        <span>🚪</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -203,9 +332,34 @@
             <div class="empty-state">
                 <div class="coming-soon-icon">🔒</div>
                 <p>VPN Status Coming Soon</p>
-                <p style="font-size: 0.9rem; color: #808080;">We're working on bringing you the VPN status management feature. Stay tuned!</p>
+                <p style="font-size: 0.9rem; color: #808080;">We're working on bringing you the VPN status management
+                    feature. Stay tuned!</p>
             </div>
         </div>
     </div>
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const dropdown = document.getElementById('userDropdown');
+            const userInfo = document.querySelector('.user-info');
+
+            if (!userInfo.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Close dropdown when a link is clicked
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function () {
+                document.getElementById('userDropdown').classList.remove('active');
+            });
+        });
+    </script>
 </body>
+
 </html>

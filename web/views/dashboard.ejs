@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Dashboard - AD Challenge</title>
     <link rel="stylesheet" href="/css/style.css">
@@ -68,6 +69,105 @@
         .navbar-menu a.active {
             color: #00d4ff;
             border-bottom: 2px solid #00d4ff;
+        }
+
+        /* User Avatar Dropdown */
+        .user-dropdown {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .user-info:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00d4ff;
+        }
+
+        .avatar-initial {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9rem;
+            border: 2px solid #00d4ff;
+        }
+
+        .user-name {
+            color: #e0e0e0;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: linear-gradient(135deg, #1a1f3a 0%, #0f1321 100%);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            min-width: 200px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-menu.active {
+            display: flex;
+        }
+
+        .dropdown-item {
+            padding: 1rem 1.5rem;
+            color: #b0b0b0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            padding-left: 2rem;
+        }
+
+        .dropdown-item.logout {
+            color: #ff4757;
+        }
+
+        .dropdown-item.logout:hover {
+            background: rgba(255, 71, 87, 0.1);
+            color: #ff6b7a;
         }
 
         /* Main Container */
@@ -255,6 +355,43 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .navbar-container {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .user-dropdown {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .navbar-menu {
+                gap: 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            .user-info {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .user-name {
+                display: none;
+            }
+
+            .dropdown-menu {
+                right: 0;
+                left: auto;
+                min-width: 180px;
+            }
+
             .navbar-menu {
                 gap: 1rem;
                 font-size: 0.9rem;
@@ -291,6 +428,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
@@ -301,12 +439,39 @@
             </a>
             <ul class="navbar-menu">
                 <li><a href="/dashboard" class="active">🏠 Home</a></li>
-                <li><a href="/profile">👤 Profile</a></li>
-                <li><a href="/team">👥 Team</a></li>
                 <li><a href="/scoreboard">🏆 Scoreboard</a></li>
                 <li><a href="/vpn">🔒 VPN Status</a></li>
-                <li><a href="/auth/logout" style="color: #ff4757;">🚪 Logout</a></li>
+                <li><a href="/services">⚙️ Services</a></li>
             </ul>
+            <div class="user-dropdown">
+                <div class="user-info" onclick="toggleDropdown()">
+                    <% if (user.avatar) { %>
+                        <img src="<%= user.avatar %>" alt="Avatar" class="avatar-small">
+                        <% } else { %>
+                            <div class="avatar-initial">
+                                <%= user.username.charAt(0).toUpperCase() %>
+                            </div>
+                            <% } %>
+                                <span class="user-name">
+                                    <%= user.fullName || user.username %>
+                                </span>
+                                <span style="color: #b0b0b0;">▼</span>
+                </div>
+                <div class="dropdown-menu" id="userDropdown">
+                    <a href="/profile" class="dropdown-item">
+                        <span>👤</span>
+                        <span>Profile</span>
+                    </a>
+                    <a href="/team" class="dropdown-item">
+                        <span>👥</span>
+                        <span>Team</span>
+                    </a>
+                    <a href="/auth/logout" class="dropdown-item logout">
+                        <span>🚪</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -317,28 +482,30 @@
             <div class="avatar-container">
                 <% if (user.avatar) { %>
                     <img src="<%= user.avatar %>" alt="Avatar" class="avatar-large">
-                <% } else { %>
-                    <div class="avatar-placeholder">
-                        <%= user.username.charAt(0).toUpperCase() %>
-                    </div>
-                <% } %>
+                    <% } else { %>
+                        <div class="avatar-placeholder">
+                            <%= user.username.charAt(0).toUpperCase() %>
+                        </div>
+                        <% } %>
             </div>
 
             <div class="welcome-message">
                 <div class="welcome-title">Welcome, <%= user.fullName || user.username %>! 👋</div>
-                <div class="welcome-username">@<%= user.username %></div>
+                <div class="welcome-username">@<%= user.username %>
+                </div>
 
                 <div class="status-badges">
                     <% if (user.isActive) { %>
                         <span class="badge badge-success">🟢 Active</span>
-                    <% } else { %>
-                        <span class="badge" style="background: rgba(255, 71, 87, 0.2); color: #ff4757;">🔴 Inactive</span>
-                    <% } %>
-                    <% if (userTeamName) { %>
-                        <span class="badge badge-info">👥 <%= userTeamName %></span>
-                    <% } else { %>
-                        <span class="badge badge-info">👥 No Team Yet</span>
-                    <% } %>
+                        <% } else { %>
+                            <span class="badge" style="background: rgba(255, 71, 87, 0.2); color: #ff4757;">🔴
+                                Inactive</span>
+                            <% } %>
+                                <% if (userTeamName) { %>
+                                    <span class="badge badge-info">👥 <%= userTeamName %></span>
+                                    <% } else { %>
+                                        <span class="badge badge-info">👥 No Team Yet</span>
+                                        <% } %>
                 </div>
             </div>
         </div>
@@ -351,22 +518,31 @@
 
                 <div class="info-item">
                     <span class="info-label">Username</span>
-                    <span class="info-value"><%= user.username %></span>
+                    <span class="info-value">
+                        <%= user.username %>
+                    </span>
                 </div>
 
                 <div class="info-item">
                     <span class="info-label">Email</span>
-                    <span class="info-value"><%= user.email %></span>
+                    <span class="info-value">
+                        <%= user.email %>
+                    </span>
                 </div>
 
                 <div class="info-item">
                     <span class="info-label">User ID</span>
-                    <span class="info-value"><%= user.id %></span>
+                    <span class="info-value">
+                        <%= user.id %>
+                    </span>
                 </div>
 
                 <div class="info-item">
                     <span class="info-label">Member Since</span>
-                    <span class="info-value"><%= new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
+                    <span class="info-value">
+                        <%= new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric' , month: 'short' ,
+                            day: 'numeric' }) %>
+                    </span>
                 </div>
 
                 <div class="quick-links">
@@ -381,12 +557,16 @@
 
                     <div class="info-item">
                         <span class="info-label">Team Name</span>
-                        <span class="info-value"><%= userTeamName %></span>
+                        <span class="info-value">
+                            <%= userTeamName %>
+                        </span>
                     </div>
 
                     <div class="info-item">
                         <span class="info-label">Members</span>
-                        <span class="info-value"><%= teamMembers ? teamMembers.length : 0 %> members</span>
+                        <span class="info-value">
+                            <%= teamMembers ? teamMembers.length : 0 %> members
+                        </span>
                     </div>
 
                     <div class="info-item">
@@ -395,48 +575,86 @@
                     </div>
                     <div class="info-item">
                         <span class="info-label">Country</span>
-                        <span class="info-value"><%= teamMembers.country || 'N/A' %></span>
+                        <span class="info-value">
+                            <%= teamMembers.country || 'N/A' %>
+                        </span>
                     </div>
 
                     <div class="quick-links">
                         <a href="/team" class="quick-link">Manage Team →</a>
                     </div>
                 </div>
-            <% } else { %>
-                <div class="card">
-                    <div class="card-title">👥 Join or Create Team</div>
+                <% } else { %>
+                    <div class="card">
+                        <div class="card-title">👥 Join or Create Team</div>
 
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🚀</div>
-                        <p>You haven't joined a team yet. Create one or join an existing team to get started!</p>
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🚀</div>
+                            <p>You haven't joined a team yet. Create one or join an existing team to get started!</p>
+                        </div>
+
+                        <div class="quick-links">
+                            <a href="/team" class="quick-link">Go to Team Management →</a>
+                        </div>
                     </div>
+                    <% } %>
 
-                    <div class="quick-links">
-                        <a href="/team" class="quick-link">Go to Team Management →</a>
-                    </div>
-                </div>
-            <% } %>
+                        <!-- Quick Navigation Card -->
+                        <div class="card">
+                            <div class="card-title">🔗 Quick Navigation</div>
 
-            <!-- Quick Navigation Card -->
-            <div class="card">
-                <div class="card-title">🔗 Quick Navigation</div>
-
-                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <a href="/profile" style="padding: 0.5rem 1rem; color: #00d4ff; text-decoration: none; border-bottom: 1px solid rgba(0, 212, 255, 0.2); transition: all 0.3s ease;" onmouseover="this.style.color='#00d4ff'; this.style.paddingLeft='1.5rem'" onmouseout="this.style.paddingLeft='1rem'">
-                        👤 Your Profile
-                    </a>
-                    <a href="/team" style="padding: 0.5rem 1rem; color: #00d4ff; text-decoration: none; border-bottom: 1px solid rgba(0, 212, 255, 0.2); transition: all 0.3s ease;" onmouseover="this.style.color='#00d4ff'; this.style.paddingLeft='1.5rem'" onmouseout="this.style.paddingLeft='1rem'">
-                        👥 Team Management
-                    </a>
-                    <a href="/scoreboard" style="padding: 0.5rem 1rem; color: #00d4ff; text-decoration: none; border-bottom: 1px solid rgba(0, 212, 255, 0.2); transition: all 0.3s ease;" onmouseover="this.style.color='#00d4ff'; this.style.paddingLeft='1.5rem'" onmouseout="this.style.paddingLeft='1rem'">
-                        🏆 Scoreboard
-                    </a>
-                    <a href="/vpn" style="padding: 0.5rem 1rem; color: #00d4ff; text-decoration: none; transition: all 0.3s ease;" onmouseover="this.style.color='#00d4ff'; this.style.paddingLeft='1.5rem'" onmouseout="this.style.paddingLeft='1rem'">
-                        🔒 VPN Status
-                    </a>
-                </div>
-            </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <a href="/profile"
+                                    style="padding: 0.5rem 1rem; color: #00d4ff; text-decoration: none; border-bottom: 1px solid rgba(0, 212, 255, 0.2); transition: all 0.3s ease;"
+                                    onmouseover="this.style.color='#00d4ff'; this.style.paddingLeft='1.5rem'"
+                                    onmouseout="this.style.paddingLeft='1rem'">
+                                    👤 Your Profile
+                                </a>
+                                <a href="/team"
+                                    style="padding: 0.5rem 1rem; color: #00d4ff; text-decoration: none; border-bottom: 1px solid rgba(0, 212, 255, 0.2); transition: all 0.3s ease;"
+                                    onmouseover="this.style.color='#00d4ff'; this.style.paddingLeft='1.5rem'"
+                                    onmouseout="this.style.paddingLeft='1rem'">
+                                    👥 Team Management
+                                </a>
+                                <a href="/scoreboard"
+                                    style="padding: 0.5rem 1rem; color: #00d4ff; text-decoration: none; border-bottom: 1px solid rgba(0, 212, 255, 0.2); transition: all 0.3s ease;"
+                                    onmouseover="this.style.color='#00d4ff'; this.style.paddingLeft='1.5rem'"
+                                    onmouseout="this.style.paddingLeft='1rem'">
+                                    🏆 Scoreboard
+                                </a>
+                                <a href="/vpn"
+                                    style="padding: 0.5rem 1rem; color: #00d4ff; text-decoration: none; transition: all 0.3s ease;"
+                                    onmouseover="this.style.color='#00d4ff'; this.style.paddingLeft='1.5rem'"
+                                    onmouseout="this.style.paddingLeft='1rem'">
+                                    🔒 VPN Status
+                                </a>
+                            </div>
+                        </div>
         </div>
     </div>
 </body>
+<script>
+    function toggleDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('active');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function (event) {
+        const dropdown = document.getElementById('userDropdown');
+        const userInfo = document.querySelector('.user-info');
+
+        if (!userInfo.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.classList.remove('active');
+        }
+    });
+
+    // Close dropdown when a link is clicked
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', function () {
+            document.getElementById('userDropdown').classList.remove('active');
+        });
+    });
+</script>
+
 </html>

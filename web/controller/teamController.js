@@ -36,9 +36,6 @@ const getTeamPage = async (req, res) => {
     }
 };
 
-/**
- * POST /team/create - Create a new team
- */
 const createTeam = async (req, res) => {
     try {
         const { teamName, country, education } = req.body;
@@ -308,10 +305,10 @@ const updateTeam = async (req, res) => {
 
         // Handle team image upload if file is provided
         if (req.file) {
-            const uploadResult = teamServices.handleTeamImageUpload(req.file);
-            
+            const uploadResult = teamServices.handleTeamImageUpload(req.file, userTeam.images);
+
             if (uploadResult.success) {
-                userTeam.teamImage = uploadResult.path;
+                userTeam.images = uploadResult.path;
             } else {
                 imageUploadError = uploadResult.error;
             }
@@ -356,7 +353,7 @@ const updateTeam = async (req, res) => {
         });
     } catch (error) {
         console.error('Update team error:', error);
-        
+
         try {
             const user = await User.findByPk(req.user.id);
             let userTeam = null;

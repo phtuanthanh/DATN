@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Team - AD Challenge</title>
     <link rel="stylesheet" href="/css/style.css">
@@ -68,6 +69,106 @@
         .navbar-menu a.active {
             color: #00d4ff;
             border-bottom: 2px solid #00d4ff;
+        }
+
+        /* User Avatar Dropdown */
+        .user-dropdown {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .user-info:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00d4ff;
+        }
+
+        .avatar-initial {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9rem;
+            border: 2px solid #00d4ff;
+            flex-shrink: 0;
+        }
+
+        .user-name {
+            color: #e0e0e0;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: linear-gradient(135deg, #1a1f3a 0%, #0f1321 100%);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            min-width: 200px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-menu.active {
+            display: flex;
+        }
+
+        .dropdown-item {
+            padding: 1rem 1.5rem;
+            color: #b0b0b0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            padding-left: 2rem;
+        }
+
+        .dropdown-item.logout {
+            color: #ff4757;
+        }
+
+        .dropdown-item.logout:hover {
+            background: rgba(255, 71, 87, 0.1);
+            color: #ff6b7a;
         }
 
         /* Main Container */
@@ -429,8 +530,15 @@
         }
 
         @keyframes modalFadeIn {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .close-modal {
@@ -488,263 +596,401 @@
         }
     </style>
 </head>
+
 <body>
+    <!-- Toast Notification Container -->
+    <div id="toastContainer"
+        style="position: fixed; top: 1rem; right: 1rem; z-index: 2000; display: flex; flex-direction: column; gap: 0.5rem;">
+    </div>
     <nav class="navbar">
         <div class="navbar-container">
             <a href="/dashboard" class="navbar-brand">
                 <span>🎯</span>
                 <span>AD Challenge</span>
             </a>
-            <ul class="navbar-menu">
-                <li><a href="/dashboard">🏠 Home</a></li>
-                <li><a href="/profile">👤 Profile</a></li>
-                <li><a href="/team" class="active">👥 Team</a></li>
-                <li><a href="/scoreboard">🏆 Scoreboard</a></li>
-                <li><a href="/vpn">🔒 VPN Status</a></li>
-                <li><a href="/auth/logout" style="color: #ff4757;">🚪 Logout</a></li>
-            </ul>
+            <div class="user-dropdown">
+                <ul class="navbar-menu">
+                    <li><a href="/dashboard">🏠 Home</a></li>
+                    <li><a href="/scoreboard">🏆 Scoreboard</a></li>
+                    <li><a href="/vpn">🔒 VPN Status</a></li>
+                    <li><a href="/services">⚙️ Services</a></li>
+                </ul>
+                <div class="user-info" onclick="toggleDropdown()">
+                    <% if (user.avatar) { %>
+                        <img src="<%= user.avatar %>" alt="Avatar" class="avatar-small">
+                        <% } else { %>
+                            <div class="avatar-initial">
+                                <%= user.fullName.charAt(0).toUpperCase() %>
+                            </div>
+                            <% } %>
+                                <span class="user-name">
+                                    <%= user.fullName %>
+                                </span>
+                                <span style="color: #b0b0b0;">▼</span>
+                </div>
+                <div class="dropdown-menu" id="userDropdown">
+                    <a href="/profile" class="dropdown-item">
+                        <span>👤</span>
+                        <span>Profile</span>
+                    </a>
+                    <a href="/team" class="dropdown-item">
+                        <span>👥</span>
+                        <span>Team</span>
+                    </a>
+                    <a href="/auth/logout" class="dropdown-item logout">
+                        <span>🚪</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </nav>
 
     <div class="container">
         <% if (successMessage) { %>
             <div class="alert alert-success">
-                <span><%= successMessage %></span>
+                <span>
+                    <%= successMessage %>
+                </span>
                 <button class="close-alert" onclick="this.parentElement.style.display='none';">×</button>
-            </div>
-        <% } %>
-        <% if (errorMessage) { %>
-            <div class="alert alert-error">
-                <span><%= errorMessage %></span>
-                <button class="close-alert" onclick="this.parentElement.style.display='none';">×</button>
-            </div>
-        <% } %>
-
-        <% if (!userTeam) { %>
-            <h1 class="page-heading">👥 Team Management</h1>
-
-            <div class="forms-section">
-                <div class="form-grid">
-                    <div class="form-card">
-                        <div class="form-title">🔑 Join Existing Team</div>
-                        <form action="/team/join" method="POST">
-                            <div class="form-group">
-                                <label for="teamKey">Team Key</label>
-                                <input 
-                                    type="text" 
-                                    id="teamKey" 
-                                    name="teamKey" 
-                                    placeholder="Enter the team key..." 
-                                    required
-                                >
-                                <small class="small">Ask your team leader for the key</small>
-                            </div>
-                            <button type="submit" class="btn">Join Team</button>
-                        </form>
-                    </div>
-
-                    <div class="form-card">
-                        <div class="form-title">➕ Create New Team</div>
-                        <form action="/team/create" method="POST" enctype="multipart/form-data">
-                            <div class="form-group">
-                                <label for="teamName">Team Name</label>
-                                <input 
-                                    type="text" 
-                                    id="teamName" 
-                                    name="teamName" 
-                                    placeholder="Enter team name..." 
-                                    required
-                                >
-                            </div>
-                            <div class="form-group">
-                                <label for="country">Country</label>
-                                <input 
-                                    type="text" 
-                                    id="country" 
-                                    name="country" 
-                                    placeholder="Enter country..." 
-                                >
-                            </div>
-                            <div class="form-group">
-                                <label for="education">Education</label>
-                                <input 
-                                    type="text" 
-                                    id="education" 
-                                    name="education" 
-                                    placeholder="Enter education level..." 
-                                >
-                            </div>
-                            <div class="form-group">
-                                <label for="teamImage">Team Image</label>
-                                <input 
-                                    type="file" 
-                                    id="teamImage" 
-                                    name="teamImage" 
-                                    accept="image/*"
-                                >
-                                <small class="small">JPG, PNG, GIF, WebP (Max 5MB)</small>
-                            </div>
-                            <button type="submit" class="btn">Create Team</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-        <% } else { %>
-            <h1 class="page-heading">👥 Your Team</h1>
-
-            <div class="team-header">
-                <div class="team-image-container">
-                    <% if (userTeam.images) { %>
-                        <img src="<%= userTeam.images %>" alt="Team Image" class="team-image-large">
-                    <% } else { %>
-                        <div style="width: 160px; height: 160px; border-radius: 50%; background: linear-gradient(135deg, #00d4ff, #0099ff); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; border: 4px solid #00d4ff; margin: 0 auto;">
-                            👥
-                        </div>
-                    <% } %>
-                </div>
-
-                <div class="team-info-main">
-                    <div>
-                        <h2 class="team-name"><%= userTeam.name %></h2>
-                    </div>
-
-                    <div class="team-details">
-                        <div class="detail-item">
-                            <span class="detail-label">📍 Country</span>
-                            <div class="detail-value"><%= userTeam.country || 'N/A' %></div>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">🎓 Education</span>
-                            <div class="detail-value"><%= userTeam.education || 'N/A' %></div>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">👥 Members</span>
-                            <div class="detail-value"><%= teamMembers ? teamMembers.length : 0 %> / <%= userTeam.maxMembers %></div>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">🔑 Team Key</span>
-                            <div class="team-key" id="teamKeyContainer">
-                                <span id="teamKeyValue"><%= userTeam.teamKey %></span>
-                                <button type="button" class="copy-btn" onclick="copyTeamKey()">📋 Copy</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 1rem; display: flex; gap: 1rem;">
-                        <button type="button" onclick="openEditModal()" style="display: inline-block; padding: 0.75rem 1.5rem; background: rgba(0, 212, 255, 0.2); color: #00d4ff; text-decoration: none; border-radius: 5px; font-weight: 600; cursor: pointer; border: 1px solid #00d4ff; transition: all 0.3s ease; font-size: 1rem; font-family: inherit;" onmouseover="this.style.background='rgba(0, 212, 255, 0.3)'" onmouseout="this.style.background='rgba(0, 212, 255, 0.2)'">
-                            ✏️ Edit Team
-                        </button>
-                        <a href="/team/leave" style="display: inline-block; padding: 0.75rem 1.5rem; background: rgba(255, 71, 87, 0.2); color: #ff4757; text-decoration: none; border-radius: 5px; font-weight: 600; cursor: pointer; border: 1px solid #ff4757; transition: all 0.3s ease; font-size: 1rem;" onmouseover="this.style.background='rgba(255, 71, 87, 0.3)'" onmouseout="this.style.background='rgba(255, 71, 87, 0.2)'">
-                            🚪 Leave Team
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="members-section">
-                <h2 class="section-title">
-                    <span>👥</span>
-                    Team Members
-                </h2>
-
-                <% if (teamMembers && teamMembers.length > 0) { %>
-                    <div class="members-grid">
-                        <% teamMembers.forEach(member => { %>
-                            <div class="member-card">
-                                <% if (member.avatar) { %>
-                                    <img src="<%= member.avatar %>" alt="Avatar" class="member-avatar">
-                                <% } else { %>
-                                    <div class="member-avatar-placeholder">
-                                        <%= member.username.charAt(0).toUpperCase() %>
-                                    </div>
-                                <% } %>
-                                <div class="member-name"><%= member.username %></div>
-                                <div class="member-email"><%= member.email %></div>
-                                <% if (member.fullName) { %>
-                                    <div class="member-fullname"><%= member.fullName %></div>
-                                <% } %>
-                                <span class="member-status <%= !member.isActive ? 'inactive' : '' %>">
-                                    <%= member.isActive ? '🟢 Active' : '🔴 Inactive' %>
-                                </span>
-                            </div>
-                        <% }); %>
-                    </div>
-                <% } else { %>
-                    <div class="empty-state">
-                        <p>You are the only member in this team</p>
-                    </div>
-                <% } %>
-            </div>
-
-            <div id="editTeamModal" class="modal-overlay">
-                <div class="modal-content">
-                    <span class="close-modal" onclick="closeEditModal()">&times;</span>
-                    <div class="form-title" style="margin-top: 0;">✏️ Edit Team Information</div>
-                    
-                    <form action="/team/update" method="POST" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label for="editTeamName">Team Name</label>
-                            <input 
-                                type="text" 
-                                id="editTeamName" 
-                                name="teamName" 
-                                value="<%= userTeam.name %>" 
-                                required
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label for="editCountry">Country</label>
-                            <input 
-                                type="text" 
-                                id="editCountry" 
-                                name="country" 
-                                value="<%= userTeam.country || '' %>"
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label for="editEducation">Education</label>
-                            <input 
-                                type="text" 
-                                id="editEducation" 
-                                name="education" 
-                                value="<%= userTeam.education || '' %>"
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label for="editTeamImage">Team Image</label>
-                            <input 
-                                type="file" 
-                                id="editTeamImage" 
-                                name="teamImage" 
-                                accept="image/*"
-                            >
-                            <small class="small">JPG, PNG, GIF, WebP (Max 5MB)</small>
-                        </div>
-                        <button type="submit" class="btn">💾 Save Changes</button>
-                    </form>
-                </div>
             </div>
             <% } %>
+                <% if (errorMessage) { %>
+                    <div class="alert alert-error">
+                        <span>
+                            <%= errorMessage %>
+                        </span>
+                        <button class="close-alert" onclick="this.parentElement.style.display='none';">×</button>
+                    </div>
+                    <% } %>
+
+                        <% if (!userTeam) { %>
+                            <h1 class="page-heading">👥 Team Management</h1>
+
+                            <div class="forms-section">
+                                <div class="form-grid">
+                                    <div class="form-card">
+                                        <div class="form-title">🔑 Join Existing Team</div>
+                                        <form action="/team/join" method="POST">
+                                            <div class="form-group">
+                                                <label for="teamKey">Team Key</label>
+                                                <input type="text" id="teamKey" name="teamKey"
+                                                    placeholder="Enter the team key..." required>
+                                                <small class="small">Ask your team leader for the key</small>
+                                            </div>
+                                            <button type="submit" class="btn">Join Team</button>
+                                        </form>
+                                    </div>
+
+                                    <div class="form-card">
+                                        <div class="form-title">➕ Create New Team</div>
+                                        <form action="/team/create" method="POST" enctype="multipart/form-data">
+                                            <div class="form-group">
+                                                <label for="teamName">Team Name</label>
+                                                <input type="text" id="teamName" name="teamName"
+                                                    placeholder="Enter team name..." required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="country">Country</label>
+                                                <input type="text" id="country" name="country"
+                                                    placeholder="Enter country...">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="education">Education</label>
+                                                <input type="text" id="education" name="education"
+                                                    placeholder="Enter education level...">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="teamImage">Team Image</label>
+                                                <input type="file" id="teamImage" name="teamImage" accept="image/*">
+                                                <small class="small">JPG, PNG, GIF, WebP (Max 5MB)</small>
+                                            </div>
+                                            <button type="submit" class="btn">Create Team</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <% } else { %>
+                                <h1 class="page-heading">👥 Your Team</h1>
+
+                                <div class="team-header">
+                                    <div class="team-image-container">
+                                        <% if (userTeam.images) { %>
+                                            <img src="<%= userTeam.images %>" alt="Team Image" class="team-image-large">
+                                            <% } else { %>
+                                                <div
+                                                    style="width: 160px; height: 160px; border-radius: 50%; background: linear-gradient(135deg, #00d4ff, #0099ff); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; border: 4px solid #00d4ff; margin: 0 auto;">
+                                                    👥
+                                                </div>
+                                                <% } %>
+                                    </div>
+
+                                    <div class="team-info-main">
+                                        <div>
+                                            <h2 class="team-name">
+                                                <%= userTeam.name %>
+                                            </h2>
+                                        </div>
+
+                                        <div class="team-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">📍 Country</span>
+                                                <div class="detail-value">
+                                                    <%= userTeam.country || 'N/A' %>
+                                                </div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">🎓 Education</span>
+                                                <div class="detail-value">
+                                                    <%= userTeam.education || 'N/A' %>
+                                                </div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">👥 Members</span>
+                                                <div class="detail-value">
+                                                    <%= teamMembers ? teamMembers.length : 0 %> / <%=
+                                                            userTeam.maxMembers %>
+                                                </div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">🔑 Team Key</span>
+                                                <div class="team-key" id="teamKeyContainer">
+                                                    <span id="teamKeyValue">
+                                                        <%= userTeam.teamKey %>
+                                                    </span>
+                                                    <button type="button" class="copy-btn"
+                                                        onclick="copyTeamKey(this)">📋
+                                                        Copy</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                                            <button type="button" onclick="openEditModal()"
+                                                style="display: inline-block; padding: 0.75rem 1.5rem; background: rgba(0, 212, 255, 0.2); color: #00d4ff; text-decoration: none; border-radius: 5px; font-weight: 600; cursor: pointer; border: 1px solid #00d4ff; transition: all 0.3s ease; font-size: 1rem; font-family: inherit;"
+                                                onmouseover="this.style.background='rgba(0, 212, 255, 0.3)'"
+                                                onmouseout="this.style.background='rgba(0, 212, 255, 0.2)'">
+                                                ✏️ Edit Team
+                                            </button>
+                                            <% if (teamMembers && teamMembers.length> 1) { %>
+                                                <a href="/team/leave"
+                                                    style="display: inline-block; padding: 0.75rem 1.5rem; background: rgba(255, 71, 87, 0.2); color: #ff4757; text-decoration: none; border-radius: 5px; font-weight: 600; cursor: pointer; border: 1px solid #ff4757; transition: all 0.3s ease; font-size: 1rem;"
+                                                    onmouseover="this.style.background='rgba(255, 71, 87, 0.3)'"
+                                                    onmouseout="this.style.background='rgba(255, 71, 87, 0.2)'">
+                                                    🚪 Leave Team
+                                                </a>
+                                                <% } else { %>
+                                                    <button type="button" onclick="showLeaveBlockedMessage()"
+                                                        style="display: inline-block; padding: 0.75rem 1.5rem; background: rgba(128, 128, 128, 0.3); color: #808080; border-radius: 5px; font-weight: 600; cursor: not-allowed; border: 1px solid #808080; transition: all 0.3s ease; font-size: 1rem; font-family: inherit;"
+                                                        disabled>
+                                                        🚪 Leave Team
+                                                    </button>
+                                                    <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="members-section">
+                                    <h2 class="section-title">
+                                        <span>👥</span>
+                                        Team Members
+                                    </h2>
+
+                                    <% if (teamMembers && teamMembers.length> 0) { %>
+                                        <div class="members-grid">
+                                            <% teamMembers.forEach(member=> { %>
+                                                <div class="member-card">
+                                                    <% if (member.avatar) { %>
+                                                        <img src="<%= member.avatar %>" alt="Avatar"
+                                                            class="member-avatar">
+                                                        <% } else { %>
+                                                            <div class="member-avatar-placeholder">
+                                                                <%= member.username.charAt(0).toUpperCase() %>
+                                                            </div>
+                                                            <% } %>
+                                                                <div class="member-name">
+                                                                    <%= member.username %>
+                                                                </div>
+                                                                <div class="member-email">
+                                                                    <%= member.email %>
+                                                                </div>
+                                                                <% if (member.fullName) { %>
+                                                                    <div class="member-fullname">
+                                                                        <%= member.fullName %>
+                                                                    </div>
+                                                                    <% } %>
+                                                                        <span
+                                                                            class="member-status <%= !member.isActive ? 'inactive' : '' %>">
+                                                                            <%= member.isActive ? '🟢 Active'
+                                                                                : '🔴 Inactive' %>
+                                                                        </span>
+                                                </div>
+                                                <% }); %>
+                                        </div>
+                                        <% } else { %>
+                                            <div class="empty-state">
+                                                <p>You are the only member in this team</p>
+                                            </div>
+                                            <% } %>
+                                </div>
+
+                                <div id="editTeamModal" class="modal-overlay">
+                                    <div class="modal-content">
+                                        <span class="close-modal" onclick="closeEditModal()">&times;</span>
+                                        <div class="form-title" style="margin-top: 0;">✏️ Edit Team Information</div>
+
+                                        <form action="/team/update" method="POST" enctype="multipart/form-data"
+                                            id="editTeamForm">
+                                            <div class="form-group">
+                                                <label for="editTeamName">Team Name</label>
+                                                <input type="text" id="editTeamName" name="teamName"
+                                                    value="<%= userTeam.name %>" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="editCountry">Country</label>
+                                                <input type="text" id="editCountry" name="country"
+                                                    value="<%= userTeam.country || '' %>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="editEducation">Education</label>
+                                                <input type="text" id="editEducation" name="education"
+                                                    value="<%= userTeam.education || '' %>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="editTeamImage">Team Image</label>
+                                                <input type="file" id="editTeamImage" name="teamImage" accept="image/*">
+                                                <small class="small">JPG, PNG, GIF, WebP (Max 5MB)</small>
+                                            </div>
+
+                                            <!-- Spinner -->
+                                            <div id="uploadSpinnerTeam"
+                                                style="display: none; text-align: center; margin-bottom: 1rem;">
+                                                <div
+                                                    style="display: inline-block; width: 30px; height: 30px; border: 3px solid #00d4ff; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;">
+                                                </div>
+                                                <p style="color: #00d4ff; margin-top: 0.5rem; font-weight: 600;">
+                                                    Uploading...</p>
+                                            </div>
+
+                                            <button type="submit" id="submitTeamBtn" class="btn">💾 Save
+                                                Changes</button>
+                                        </form>
+
+                                        <style>
+                                            @keyframes spin {
+                                                to {
+                                                    transform: rotate(360deg);
+                                                }
+                                            }
+                                        </style>
+                                    </div>
+                                </div>
+                                <% } %>
     </div>
 
     <script>
+        // Toast notification function
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+
+            const bgColor = type === 'error' ? '#ff4757' : '#2ed573';
+            const icon = type === 'error' ? '❌' : '✓';
+
+            toast.style.cssText = `
+                background: ${bgColor};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 5px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                animation: slideIn 0.3s ease;
+                font-size: 0.95rem;
+            `;
+
+            toast.textContent = `${icon} ${message}`;
+            container.appendChild(toast);
+
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Add animations to style
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
         // Copy team key function
-        function copyTeamKey() {
-            const keyValue = document.getElementById('teamKeyValue').innerText;
-            navigator.clipboard.writeText(keyValue).then(() => {
-                const btn = event.target;
-                const originalText = btn.innerText;
-                btn.innerText = '✓ Copied!';
-                btn.style.background = '#2ed573';
-                setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.style.background = '#0099cc';
-                }, 2000);
-            }).catch(err => {
+        function copyTeamKey(btn) {
+            const keyElement = document.getElementById('teamKeyValue');
+            const keyValue = keyElement.textContent.trim();
+
+            if (!keyValue) {
+                showToast('Team key not found', 'error');
+                return;
+            }
+
+            // Use temporary textarea to copy
+            const textarea = document.createElement('textarea');
+            textarea.value = keyValue;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+
+            try {
+                textarea.select();
+                const success = document.execCommand('copy');
+                if (success) {
+                    btn.innerHTML = '✓ Copied!';
+                    btn.style.background = '#2ed573';
+                    showToast('Team key copied!', 'success');
+                    setTimeout(() => {
+                        btn.innerHTML = '📋<br>Copy';
+                        btn.style.background = '#0099cc';
+                    }, 2000);
+                } else {
+                    showToast('Failed to copy team key', 'error');
+                }
+            } catch (err) {
                 console.error('Failed to copy:', err);
-                alert('Failed to copy team key');
-            });
+                showToast('Failed to copy team key', 'error');
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // Show message when trying to leave team with only 1 member
+        function showLeaveBlockedMessage() {
+            showToast('Cannot leave team with only 1 member. Delete the team instead.', 'error');
         }
 
         // Modal Control Functions
@@ -763,11 +1009,117 @@
         }
 
         // Close modal when clicking outside of it
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             if (event.target == editModal) {
                 closeEditModal();
             }
         }
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const dropdown = document.getElementById('userDropdown');
+            const userInfo = document.querySelector('.user-info');
+
+            if (!userInfo.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Close dropdown when a link is clicked
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function () {
+                document.getElementById('userDropdown').classList.remove('active');
+            });
+        });
+
+        /**
+         * Handle create team form submission with file validation
+         */
+        const createTeamForms = document.querySelectorAll('form[action="/team/create"]');
+        createTeamForms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                const teamImageInput = this.querySelector('input[name="teamImage"]');
+                const file = teamImageInput.files[0];
+
+                // Frontend validation if file is selected
+                if (file) {
+                    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
+                    // Check file type
+                    if (!ALLOWED_TYPES.includes(file.type)) {
+                        e.preventDefault();
+                        showToast(`Invalid file type: ${file.type}. Only JPG, PNG, GIF, WebP allowed`, 'error');
+                        return false;
+                    }
+
+                    // Check file size
+                    if (file.size > MAX_SIZE) {
+                        e.preventDefault();
+                        const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                        showToast(`File too large: ${sizeMB}MB. Maximum 5MB allowed`, 'error');
+                        return false;
+                    }
+                }
+            });
+        });
+
+        /**
+         * Handle team edit form submission with file validation
+         */
+        const editTeamForm = document.getElementById('editTeamForm');
+        if (editTeamForm) {
+            editTeamForm.addEventListener('submit', function (e) {
+                const teamImageInput = document.getElementById('editTeamImage');
+                const file = teamImageInput.files[0];
+
+                // Frontend validation if file is selected
+                if (file) {
+                    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
+                    // Check file type
+                    if (!ALLOWED_TYPES.includes(file.type)) {
+                        e.preventDefault();
+                        showToast(`Invalid file type: ${file.type}. Only JPG, PNG, GIF, WebP allowed`, 'error');
+                        return false;
+                    }
+
+                    // Check file size
+                    if (file.size > MAX_SIZE) {
+                        e.preventDefault();
+                        const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                        showToast(`File too large: ${sizeMB}MB. Maximum 5MB allowed`, 'error');
+                        return false;
+                    }
+                }
+
+                const submitBtn = document.getElementById('submitTeamBtn');
+                const spinner = document.getElementById('uploadSpinnerTeam');
+
+                // Show spinner and disable button
+                spinner.style.display = 'block';
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.6';
+                submitBtn.style.cursor = 'not-allowed';
+
+                // Set timeout to restore UI if no response (shouldn't happen now with fast error handling)
+                const timeoutId = setTimeout(() => {
+                    if (spinner.style.display !== 'none') {
+                        spinner.style.display = 'none';
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = '1';
+                        submitBtn.style.cursor = 'pointer';
+                    }
+                }, 10000); // 10 second timeout
+            });
+        }
     </script>
 </body>
+
 </html>

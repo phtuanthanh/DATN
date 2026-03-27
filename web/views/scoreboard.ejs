@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scoreboard - AD Challenge</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0e27;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: linear-gradient(135deg, #1a1f3a 0%, #0f1321 100%);
+            border-bottom: 2px solid #00d4ff;
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            color: #00d4ff;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .navbar-menu a {
+            color: #b0b0b0;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .navbar-menu a:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .navbar-menu a.active {
+            color: #00d4ff;
+            border-bottom: 2px solid #00d4ff;
+        }
+
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: #00d4ff;
+        }
+
+        .page-nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-nav {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 2px solid #00d4ff;
+            color: #00d4ff;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-nav:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .btn-nav.btn-primary {
+            background: #00d4ff;
+            color: #0a0e27;
+        }
+
+        .btn-nav.btn-primary:hover {
+            background: #00b8d4;
+        }
+
+        /* Card Styles */
+        .card {
+            background: linear-gradient(135deg, #1a1f3a 0%, #0f1321 100%);
+            border: 1px solid #2a3f5f;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: #00d4ff;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #b0b0b0;
+        }
+
+        .empty-state p {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .coming-soon-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .page-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .page-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard" class="navbar-brand">
+                <span>🎯</span>
+                <span>AD Challenge</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/dashboard">🏠 Home</a></li>
+                <li><a href="/profile">👤 Profile</a></li>
+                <li><a href="/team">👥 Team</a></li>
+                <li><a href="/scoreboard" class="active">🏆 Scoreboard</a></li>
+                <li><a href="/vpn">🔒 VPN Status</a></li>
+                <li><a href="/auth/logout" style="color: #ff4757;">🚪 Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <div class="page-header">
+            <h1>🏆 Scoreboard</h1>
+            <div class="page-nav">
+                <a href="/dashboard" class="btn-nav">← Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="empty-state">
+                <div class="coming-soon-icon">🏆</div>
+                <p>Scoreboard Coming Soon</p>
+                <p style="font-size: 0.9rem; color: #808080;">We're working on bringing you the exciting scoreboard feature. Stay tuned!</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

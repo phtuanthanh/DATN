@@ -10,9 +10,9 @@ const syncModels = async () => {
     try {
         await sequelize.authenticate();
         console.log('Database connection established successfully.');
-        // Use force: true to drop and recreate tables with proper sequences
-        // This ensures auto-increment IDs work correctly in PostgreSQL
-        await sequelize.sync({ force: true });
+        // Use alter: true to modify existing tables to match models
+        // This adds/updates columns without dropping data
+        await sequelize.sync({ alter: true });
         console.log('All models synchronized successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);

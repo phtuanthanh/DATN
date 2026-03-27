@@ -12,6 +12,27 @@ const Team = sequelize.define('Team', {
         allowNull: false,
         unique: true
     },
+    country: {
+        type: DataTypes.STRING(100),
+        allowNull: true
+    },
+    education: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    images: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    teamKey: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+        unique: true
+    },
+    maxMembers: {
+        type: DataTypes.INTEGER,
+        defaultValue: 5
+    },
     net: {
         type: DataTypes.INTEGER,
         allowNull: true

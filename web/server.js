@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const session = require('express-session');
+const cookieParser = require('cookie-parser');
 
 // Import Database and Models
 const { syncModels } = require('./models');
@@ -10,6 +10,7 @@ const { syncModels } = require('./models');
 const homeRouter = require('./routes/home');
 const authRouter = require('./routes/auth');
 const userRouter = require('./routes/user');
+const teamRouter = require('./routes/team');
 
 // Import Middleware
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
@@ -24,26 +25,16 @@ app.set('views', path.join(__dirname, 'views'));
 // ===== Middleware =====
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 // Static Files
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Session Configuration
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key-change-this',
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: false,
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24 * 7
-    }
-}));
 
 // ===== Routes =====
 app.use('/', homeRouter);
 app.use('/auth', authRouter);
 app.use('/', userRouter);
+app.use('/team', teamRouter);
 
 // ===== Error Handlers =====
 app.use(notFoundHandler);

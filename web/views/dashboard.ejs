@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - AD Challenge</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0e27;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: linear-gradient(135deg, #1a1f3a 0%, #0f1321 100%);
+            border-bottom: 2px solid #00d4ff;
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            color: #00d4ff;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .navbar-menu a {
+            color: #b0b0b0;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .navbar-menu a:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .navbar-menu a.active {
+            color: #00d4ff;
+            border-bottom: 2px solid #00d4ff;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05) 0%, rgba(0, 100, 200, 0.05) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .avatar-container {
+            margin-bottom: 2rem;
+        }
+
+        .avatar-large {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #00d4ff;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4), 0 0 60px rgba(0, 212, 255, 0.2);
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        .avatar-placeholder {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            border: 4px solid #00d4ff;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4), 0 0 60px rgba(0, 212, 255, 0.2);
+            margin: 0 auto;
+        }
+
+        .welcome-message {
+            margin-top: 2rem;
+        }
+
+        .welcome-title {
+            font-size: 2.2rem;
+            color: #00d4ff;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-username {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            margin-bottom: 1rem;
+        }
+
+        .status-badges {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-success {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+        }
+
+        .badge-info {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background: linear-gradient(135deg, #1a1f3a 0%, #0f1321 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: #00d4ff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid #00d4ff;
+            padding-bottom: 1rem;
+        }
+
+        .info-item {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #b0b0b0;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #e0e0e0;
+            font-size: 1rem;
+        }
+
+        .quick-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .quick-link {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            text-decoration: none;
+            border: 1px solid #00d4ff;
+            border-radius: 5px;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .quick-link:hover {
+            background: #00d4ff;
+            color: #0a0e27;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #b0b0b0;
+        }
+
+        .empty-state-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-menu {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .hero-section {
+                padding: 2rem;
+            }
+
+            .welcome-title {
+                font-size: 1.8rem;
+            }
+
+            .avatar-large,
+            .avatar-placeholder {
+                width: 140px;
+                height: 140px;
+                font-size: 3rem;
+            }
+
+            .container {
+                padding: 1.5rem 1rem;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .info-item {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard" class="navbar-brand">
+                <span>🎯</span>
+                <span>AD Challenge</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/dashboard" class="active">🏠 Home</a></li>
+                <li><a href="/profile">👤 Profile</a></li>
+                <li><a href="/team">👥 Team</a></li>
+                <li><a href="/scoreboard">🏆 Scoreboard</a></li>
+                <li><a href="/vpn">🔒 VPN Status</a></li>
+                <li><a href="/auth/logout" style="color: #ff4757;">🚪 Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero Section with Avatar -->
+        <div class="hero-section">
+            <div class="avatar-container">
+                <% if (user.avatar) { %>
+                    <img src="<%= user.avatar %>" alt="Avatar" class="avatar-large">
+                <% } else { %>
+                    <div class="avatar-placeholder">
+                        <%= user.username.charAt(0).toUpperCase() %>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="welcome-message">
+                <div class="welcome-title">Welcome, <%= user.fullName || user.username %>! 👋</div>
+                <div class="welcome-username">@<%= user.username %></div>
+
+                <div class="status-badges">
+                    <% if (user.isActive) { %>
+                        <span class="badge badge-success">🟢 Active</span>
+                    <% } else { %>
+                        <span class="badge" style="background: rgba(255, 71, 87, 0.2); color: #ff4757;">🔴 Inactive</span>
+                    <% } %>
+                    <% if (userTeamName) { %>
+                        <span class="badge badge-info">👥 <%= userTeamName %></span>
+                    <% } else { %>
+                        <span class="badge badge-info">👥 No Team Yet</span>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- User Info Card -->
+            <div class="card">
+                <div class="card-title">👤 User Information</div>
+
+                <div class="info-item">
+                    <span class="info-label">Username</span>
+                    <span class="info-value"><%= user.username %></span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <span class="info-value"><%= user.email %></span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">User ID</span>
+                    <span class="info-value"><%= user.id %></span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Member Since</span>
+                    <span class="info-value"><%= new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
+                </div>
+
+                <div class="quick-links">
+                    <a href="/profile" class="quick-link">View Full Profile →</a>
+                </div>
+            </div>
+
+            <!-- Team Info Card -->
+            <% if (userTeamName) { %>
+                <div class="card">
+                    <div class="card-title">👥 Team Information</div>
+
+                    <div class="info-item">
+                        <span class="info-label">Team Name</span>
+                        <span class="info-value"><%= userTeamName %></span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Members</span>
+                        <span class="info-value"><%= teamMembers ? teamMembers.length : 0 %> members</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Status</span>
+                        <span class="info-value" style="color: #2ed573; font-weight: 600;">✓ Joined</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Country</span>
+                        <span class="info-value"><%= teamMembers.country || 'N/A' %></span>
+                    </div>
+
+                    <div class="quick-links">
+                        <a href="/team" class="quick-link">Manage Team →</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="card">
+                    <div class="card-title">👥 Join or Create Team</div>
+
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🚀</div>
+                        <p>You haven't joined a team yet. Create one or join an existing team to get started!</p>
+                    </div>
+
+                    <div class="quick-links">
+                        <a href="/team" class="quick-link">Go to Team Management →</a>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Quick Navigation Card -->
+            <div class="card">
+                <div class="card-title">🔗 Quick Navigation</div>
+
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <a href="/profile" style="padding: 0.5rem 1rem; color: #00d4ff; text-decoration: none; border-bottom: 1px solid rgba(0, 212, 255, 0.2); transition: all 0.3s ease;" onmouseover="this.style.color='#00d4ff'; this.style.paddingLeft='1.5rem'" onmouseout="this.style.paddingLeft='1rem'">
+                        👤 Your Profile
+                    </a>
+                    <a href="/team" style="padding: 0.5rem 1rem; color: #00d4ff; text-decoration: none; border-bottom: 1px solid rgba(0, 212, 255, 0.2); transition: all 0.3s ease;" onmouseover="this.style.color='#00d4ff'; this.style.paddingLeft='1.5rem'" onmouseout="this.style.paddingLeft='1rem'">
+                        👥 Team Management
+                    </a>
+                    <a href="/scoreboard" style="padding: 0.5rem 1rem; color: #00d4ff; text-decoration: none; border-bottom: 1px solid rgba(0, 212, 255, 0.2); transition: all 0.3s ease;" onmouseover="this.style.color='#00d4ff'; this.style.paddingLeft='1.5rem'" onmouseout="this.style.paddingLeft='1rem'">
+                        🏆 Scoreboard
+                    </a>
+                    <a href="/vpn" style="padding: 0.5rem 1rem; color: #00d4ff; text-decoration: none; transition: all 0.3s ease;" onmouseover="this.style.color='#00d4ff'; this.style.paddingLeft='1.5rem'" onmouseout="this.style.paddingLeft='1rem'">
+                        🔒 VPN Status
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

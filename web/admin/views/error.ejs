@@ -1,0 +1,40 @@
+<%- include('../layout') %>
+
+    <div class="error-page">
+        <h1>Error</h1>
+        <p>
+            <%= typeof message !=='undefined' ? message : 'An error occurred' %>
+        </p>
+        <a href="/admin">Go to Dashboard</a>
+    </div>
+
+    <style>
+        .error-page {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .error-page h1 {
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        .error-page p {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        .error-page a {
+            color: #3498db;
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 1px solid #3498db;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .error-page a:hover {
+            background: #3498db;
+            color: white;
+        }
+    </style>

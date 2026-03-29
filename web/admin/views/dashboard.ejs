@@ -1,0 +1,237 @@
+<div class="dashboard">
+    <!-- Taskbar Navigation -->
+    <div class="dashboard-taskbar">
+        <div class="taskbar-tabs">
+            <button class="tab-btn active" data-tab="competition">
+                <span class="tab-icon">🏆</span>
+                Competition
+            </button>
+            <button class="tab-btn" data-tab="vpn">
+                <span class="tab-icon">🔐</span>
+                VPN
+            </button>
+            <button class="tab-btn" data-tab="team">
+                <span class="tab-icon">👥</span>
+                Team
+            </button>
+            <button class="tab-btn" data-tab="user">
+                <span class="tab-icon">👤</span>
+                User
+            </button>
+            <button class="tab-btn" data-tab="test">
+                <span class="tab-icon">🧪</span>
+                Test
+            </button>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <% if (typeof error !=='undefined' && error) { %>
+        <div class="alert alert-error">
+            <%= error %>
+        </div>
+        <% } %>
+
+            <!-- COMPETITION TAB -->
+            <div id="competition-section" class="tab-content active">
+                <div class="section-header">
+                    <h2>Competition Information</h2>
+                    <p class="section-subtitle">Basic competition settings and status</p>
+                </div>
+
+                <div class="competition-container">
+                    <div class="competition-overview">
+                        <% if (competition) { %>
+                            <div class="competition-status">
+                                <div class="status-badge <%= competition.isActive ? 'active' : 'inactive' %>">
+                                    <%= competition.isActive ? '🟢 ACTIVE' : '🔴 INACTIVE' %>
+                                </div>
+                                <h3>
+                                    <%= competition.competitionName %>
+                                </h3>
+                            </div>
+
+                            <div class="competition-grid">
+                                <div class="info-card">
+                                    <label>Competition Name</label>
+                                    <p class="info-value">
+                                        <%= competition.competitionName %>
+                                    </p>
+                                </div>
+                                <div class="info-card">
+                                    <label>Flag Prefix</label>
+                                    <p class="info-value"><code><%= competition.flagPrefix %></code></p>
+                                </div>
+                                <div class="info-card">
+                                    <label>Start Time</label>
+                                    <p class="info-value">
+                                        <%= competition.startTime %>
+                                    </p>
+                                </div>
+                                <div class="info-card">
+                                    <label>End Time</label>
+                                    <p class="info-value">
+                                        <%= competition.endTime %>
+                                    </p>
+                                </div>
+                                <div class="info-card">
+                                    <label>Current Tick</label>
+                                    <p class="info-value"><strong>
+                                            <%= competition.currentTick %>
+                                        </strong></p>
+                                </div>
+                                <div class="info-card">
+                                    <label>Valid Ticks</label>
+                                    <p class="info-value">
+                                        <%= competition.validTicks %>
+                                    </p>
+                                </div>
+                                <div class="info-card">
+                                    <label>Tick Duration (seconds)</label>
+                                    <p class="info-value">
+                                        <%= competition.tickDuration %>
+                                    </p>
+                                </div>
+                                <div class="info-card">
+                                    <label>Cancel Checks</label>
+                                    <p class="info-value">
+                                        <span
+                                            class="badge <%= competition.cancelChecks ? 'badge-warning' : 'badge-success' %>">
+                                            <%= competition.cancelChecks ? 'YES' : 'NO' %>
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="competition-actions">
+                                <button class="btn btn-primary" onclick="editCompetition()">Edit
+                                    Competition</button>
+                                <button class="btn btn-secondary" onclick="viewScoring()">View Scoring</button>
+                            </div>
+                            <% } else { %>
+                                <div class="alert alert-warning">
+                                    <p>No competition data found. Please configure competition settings first.</p>
+                                    <button class="btn btn-primary" onclick="createCompetition()">Create
+                                        Competition</button>
+                                </div>
+                                <% } %>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Users</h3>
+                            <p class="stat-value">
+                                <%= stats.totalUsers %>
+                            </p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Teams</h3>
+                            <p class="stat-value">
+                                <%= stats.totalTeams %>
+                            </p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Active Teams</h3>
+                            <p class="stat-value">
+                                <%= stats.activeTeams %>
+                            </p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>VPN Team Configs</h3>
+                            <p class="stat-value">
+                                <%= stats.vpnTeamConfigs %>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VPN TAB -->
+            <div id="vpn-section" class="tab-content">
+                <div class="section-header">
+                    <h2>VPN Configuration</h2>
+                    <p class="section-subtitle">Manage VPN settings for teams and users</p>
+                </div>
+                <div class="dashboard-section">
+                    <p>VPN management section - Coming soon</p>
+                </div>
+            </div>
+
+            <!-- TEAM TAB -->
+            <div id="team-section" class="tab-content">
+                <div class="section-header">
+                    <h2>Teams Management</h2>
+                    <p class="section-subtitle">View and manage competition teams</p>
+                </div>
+                <div class="dashboard-section">
+                    <p>Teams management section - Coming soon</p>
+                </div>
+            </div>
+
+            <!-- USER TAB -->
+            <div id="user-section" class="tab-content">
+                <div class="section-header">
+                    <h2>Users Management</h2>
+                    <p class="section-subtitle">View and manage system users</p>
+                </div>
+                <div class="dashboard-section">
+                    <p>Users management section - Coming soon</p>
+                </div>
+            </div>
+
+            <!-- TEST TAB -->
+            <div id="test-section" class="tab-content">
+                <div class="section-header">
+                    <h2>Test & Diagnostics</h2>
+                    <p class="section-subtitle">Test various system components</p>
+                </div>
+                <div class="dashboard-section">
+                    <p>Test section - Coming soon</p>
+                </div>
+            </div>
+</div>
+
+<script>
+    // Tab switching functionality
+    document.querySelectorAll('.tab-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const tabName = this.getAttribute('data-tab');
+            switchTab(tabName);
+        });
+    });
+
+    function switchTab(tabName) {
+        // Hide all sections
+        document.querySelectorAll('.tab-content').forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // Deactivate all buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Show selected section
+        const selectedSection = document.getElementById(tabName + '-section');
+        if (selectedSection) {
+            selectedSection.classList.add('active');
+        }
+
+        // Activate selected button
+        event.target.closest('.tab-btn').classList.add('active');
+    }
+
+    // Placeholder functions
+    function editCompetition() {
+        alert('Edit Competition - Feature coming soon');
+    }
+
+    function viewScoring() {
+        alert('View Scoring - Feature coming soon');
+    }
+
+    function createCompetition() {
+        alert('Create Competition - Feature coming soon');
+    }
+</script>

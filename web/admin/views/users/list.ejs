@@ -1,0 +1,61 @@
+<%- include('../layout') %>
+
+    <div class="users-page">
+        <h2>Users Management</h2>
+
+        <% if (typeof error !=='undefined' && error) { %>
+            <div class="alert alert-error">
+                <%= error %>
+            </div>
+            <% } %>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Team</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(user=> { %>
+                            <tr>
+                                <td>
+                                    <%= user.id %>
+                                </td>
+                                <td>
+                                    <%= user.username %>
+                                </td>
+                                <td>
+                                    <%= user.email %>
+                                </td>
+                                <td>
+                                    <%= user.team ? user.team.name : 'No Team' %>
+                                </td>
+                                <td><span class="<%= user.isActive ? 'badge-active' : 'badge-inactive' %>">
+                                        <%= user.isActive ? 'Active' : 'Inactive' %>
+                                    </span></td>
+                                <td>
+                                    <%= new Date(user.createdAt).toLocaleDateString() %>
+                                </td>
+                                <td><a href="/admin/users/<%= user.id %>">View</a></td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    <% if (pagination.current> 1) { %>
+                        <a href="/admin/users?page=<%= pagination.current - 1 %>">Previous</a>
+                        <% } %>
+                            <span>Page <%= pagination.current %> of <%= pagination.total %> (<%= pagination.count %>
+                                            total)</span>
+                            <% if (pagination.current < pagination.total) { %>
+                                <a href="/admin/users?page=<%= pagination.current + 1 %>">Next</a>
+                                <% } %>
+                </div>
+    </div>

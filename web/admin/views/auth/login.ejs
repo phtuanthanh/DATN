@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - AD Challenge</title>
+    <link rel="stylesheet" href="/css/auth.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f4d 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .login-form {
+            background: rgba(15, 19, 33, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 15px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.1);
+        }
+
+        .login-form h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #b0b0b0;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .alert.alert-error {
+            background: rgba(255, 23, 68, 0.1);
+            border: 1px solid rgba(255, 23, 68, 0.5);
+            color: #ff5252;
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #e0e0e0;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+
+        .form-group input::placeholder {
+            color: #777;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            border: none;
+            border-radius: 8px;
+            color: #0a0e27;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .demo-info {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+        }
+
+        .demo-title {
+            color: #00d4ff;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .demo-credentials {
+            display: grid;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .demo-item {
+            display: flex;
+            justify-content: space-between;
+            color: #b0b0b0;
+            padding: 0.5rem;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 5px;
+        }
+
+        .demo-item strong {
+            color: #e0e0e0;
+            min-width: 100px;
+        }
+
+        .demo-value {
+            color: #00d4ff;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <form action="/auth/login" method="POST" class="login-form">
+            <h1>Admin Panel</h1>
+            <p class="subtitle">Secure Administration Access</p>
+
+            <% if (typeof errorMessage !=='undefined' && errorMessage) { %>
+                <div class="alert alert-error">
+                    <%= errorMessage %>
+                </div>
+                <% } %>
+
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="admin" value="admin" required
+                            autocomplete="username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="••••••••" value="123456"
+                            required autocomplete="current-password">
+                    </div>
+
+                    <button type="submit" class="btn-submit">🔓 Sign In</button>
+
+                    <div class="demo-info">
+                        <div class="demo-title">📋 Demo Credentials</div>
+                        <div class="demo-credentials">
+                            <div class="demo-item">
+                                <strong>Username:</strong>
+                                <span class="demo-value">admin</span>
+                            </div>
+                            <div class="demo-item">
+                                <strong>Password:</strong>
+                                <span class="demo-value">123456</span>
+                            </div>
+                        </div>
+                    </div>
+        </form>
+    </div>
+</body>
+
+</html>

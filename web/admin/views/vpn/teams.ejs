@@ -1,0 +1,122 @@
+<%- include('../layout') %>
+
+    <div class="vpn-page">
+        <h2>VPN Team Configurations</h2>
+
+        <% if (typeof error !=='undefined' && error) { %>
+            <div class="alert alert-error">
+                <%= error %>
+            </div>
+            <% } %>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Team</th>
+                            <th>Type</th>
+                            <th>IP</th>
+                            <th>Status</th>
+                            <th>Path</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% configs.forEach(config=> { %>
+                            <tr>
+                                <td>
+                                    <%= config.id %>
+                                </td>
+                                <td>
+                                    <%= config.nameVpn %>
+                                </td>
+                                <td><a href="/admin/teams/<%= config.team.id %>">
+                                        <%= config.team.name %>
+                                    </a></td>
+                                <td><span class="<%= config.typeVpn ? 'badge-true' : 'badge-false' %>">
+                                        <%= config.typeVpn ? 'Type 1' : 'Type 2' %>
+                                    </span></td>
+                                <td>
+                                    <%= config.ipVpn || 'N/A' %>
+                                </td>
+                                <td>
+                                    <%= config.statusVpn || 'N/A' %>
+                                </td>
+                                <td><code><%= config.path ? config.path.substring(0, 30) + '...' : 'N/A' %></code></td>
+                                <td>
+                                    <%= new Date(config.createdAt).toLocaleDateString() %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    <% if (pagination.current> 1) { %>
+                        <a href="/admin/vpn/teams?page=<%= pagination.current - 1 %>">Previous</a>
+                        <% } %>
+                            <span>Page <%= pagination.current %> of <%= pagination.total %> (<%= pagination.count %>
+                                            total)</span>
+                            <% if (pagination.current < pagination.total) { %>
+                                <a href="/admin/vpn/teams?page=<%= pagination.current + 1 %>">Next</a>
+                                <% } %>
+                </div>
+    </div>
+
+    <style>
+        code {
+            background: #ecf0f1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .badge-true {
+            background: #d6eaf8;
+            color: #2980b9;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .badge-false {
+            background: #fadbd8;
+            color: #c0392b;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .table a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .table a:hover {
+            text-decoration: underline;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pagination a {
+            margin: 0 10px;
+            padding: 8px 15px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .pagination a:hover {
+            background: #2980b9;
+        }
+
+        .pagination span {
+            margin: 0 10px;
+            color: #7f8c8d;
+        }
+    </style>

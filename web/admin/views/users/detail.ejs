@@ -1,0 +1,103 @@
+<%- include('../layout') %>
+
+    <div class="user-detail">
+        <a href="/admin/users">← Back to Users</a>
+
+        <h2>User Details</h2>
+
+        <div class="detail-card">
+            <h3>
+                <%= user.username %>
+            </h3>
+            <dl>
+                <dt>ID:</dt>
+                <dd>
+                    <%= user.id %>
+                </dd>
+
+                <dt>Email:</dt>
+                <dd>
+                    <%= user.email %>
+                </dd>
+
+                <dt>Full Name:</dt>
+                <dd>
+                    <%= user.fullName || 'N/A' %>
+                </dd>
+
+                <dt>Team:</dt>
+                <dd>
+                    <%= user.team ? user.team.name : 'No Team' %>
+                </dd>
+
+                <dt>Status:</dt>
+                <dd><span class="<%= user.isActive ? 'badge-active' : 'badge-inactive' %>">
+                        <%= user.isActive ? 'Active' : 'Inactive' %>
+                    </span></dd>
+
+                <dt>Created:</dt>
+                <dd>
+                    <%= new Date(user.createdAt).toLocaleString() %>
+                </dd>
+
+                <dt>Updated:</dt>
+                <dd>
+                    <%= new Date(user.updatedAt).toLocaleString() %>
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <style>
+        .user-detail {
+            max-width: 600px;
+        }
+
+        .user-detail a {
+            color: #3498db;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .detail-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-card h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .detail-card dl {
+            display: grid;
+            gap: 15px;
+        }
+
+        .detail-card dt {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .detail-card dd {
+            margin-left: 0;
+            color: #7f8c8d;
+        }
+
+        .badge-active {
+            background: #d5f4e6;
+            color: #27ae60;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .badge-inactive {
+            background: #fadbd8;
+            color: #c0392b;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+    </style>

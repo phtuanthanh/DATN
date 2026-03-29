@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05) 0%, rgba(0, 100, 200, 0.05) 100%);
+        }
+
+        .auth-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 4rem;
+            width: 100%;
+            max-width: 600px;
+            animation: fadeInUp 0.6s ease-out;
+            box-shadow: 0 30px 80px rgba(0, 212, 255, 0.15);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .avatar-upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: rgba(0, 212, 255, 0.05);
+            border: 2px dashed var(--border-color);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-upload-section:hover {
+            border-color: var(--primary-color);
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .avatar-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 3px solid var(--primary-color);
+            display: none;
+        }
+
+        .avatar-preview.show {
+            display: block;
+        }
+
+        .avatar-placeholder {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .avatar-placeholder.hidden {
+            display: none;
+        }
+
+        .avatar-input-label {
+            display: inline-block;
+            padding: 0.7rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 8px;
+            color: var(--dark-bg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 0.5rem;
+        }
+
+        .avatar-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        #avatar {
+            display: none;
+        }
+
+        .avatar-info {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .auth-title {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .auth-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 0;
+            font-size: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: capitalize;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            background: rgba(0, 212, 255, 0.05);
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: rgba(0, 212, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: rgba(255, 23, 68, 0.15);
+            border: 1.5px solid rgba(255, 23, 68, 0.6);
+            color: #ff5252;
+            padding: 1.2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            display: none;
+            font-weight: 500;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border: none;
+            border-radius: 10px;
+            color: var(--dark-bg);
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 212, 255, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .auth-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 700;
+            transition: var(--transition);
+            margin-left: 0.3rem;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+            color: var(--secondary-color);
+        }
+
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 0.6rem 1.2rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .back-home:hover {
+            background: var(--primary-color);
+            color: var(--dark-bg);
+            transform: translateX(-3px);
+        }
+
+        .password-requirements {
+            background: rgba(0, 212, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .password-requirements strong {
+            display: block;
+            color: var(--text-primary);
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .password-requirements ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .password-requirements li {
+            margin: 0.5rem 0;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-container">
+        <div>
+            <a href="/" class="back-home">← Back to home</a>
+
+            <div class="auth-box">
+                <div class="auth-header">
+                    <h1 class="auth-title">Sign Up</h1>
+                    <p class="auth-subtitle">Create a new account and start your journey</p>
+                </div>
+
+                <% if (error) { %>
+                    <div class="error-message show">
+                        <%= error %>
+                    </div>
+                    <% } %>
+
+                        <form action="/auth/register" method="POST" enctype="multipart/form-data">
+                            <!-- Avatar Upload Section -->
+                            <div class="avatar-upload-section">
+                                <div id="avatarPlaceholder" class="avatar-placeholder">👤</div>
+                                <img id="avatarPreview" class="avatar-preview" alt="Avatar Preview">
+                                <label for="avatar" class="avatar-input-label">Choose Profile Picture</label>
+                                <input type="file" id="avatar" name="avatar" accept="image/*">
+                                <p class="avatar-info">PNG, JPG, GIF max 5MB</p>
+                            </div>
+
+                            <!-- Form Grid -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="username">Username</label>
+                                    <input type="text" id="username" name="username" placeholder="e.g: hades_player"
+                                        required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row full">
+                                <div class="form-group">
+                                    <label for="fullName">Full Name</label>
+                                    <input type="text" id="fullName" name="fullName" placeholder="Enter your full name">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" id="password" name="password" placeholder="••••••••" required
+                                        oncopy="return false" oncut="return false">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="passwordConfirm">Confirm Password</label>
+                                    <input type="password" id="passwordConfirm" name="passwordConfirm"
+                                        placeholder="••••••••" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="submit-btn">Create Account</button>
+
+                            <div class="password-requirements">
+                                <strong>📋 Password Requirements:</strong>
+                                <ul>
+                                    <li>✓ At least 8 characters</li>
+                                    <li>✓ Contains uppercase and lowercase letters</li>
+                                    <li>✓ Contains numbers</li>
+                                    <li>✓ Contains special characters (!@#$%^&*)</li>
+                                </ul>
+                            </div>
+                        </form>
+
+                        <div class="auth-footer">
+                            Already have an account?
+                            <a href="/auth/login">Sign in</a>
+                        </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Avatar Preview
+        const avatarInput = document.getElementById('avatar');
+        const avatarPreview = document.getElementById('avatarPreview');
+        const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+
+        avatarInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    avatarPreview.src = event.target.result;
+                    avatarPreview.classList.add('show');
+                    avatarPlaceholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+
+    <script src="/js/main.js"></script>
+</body>
+
+</html>

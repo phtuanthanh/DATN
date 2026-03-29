@@ -1,0 +1,61 @@
+<%- include('../layout') %>
+
+    <div class="teams-page">
+        <h2>Teams Management</h2>
+
+        <% if (typeof error !=='undefined' && error) { %>
+            <div class="alert alert-error">
+                <%= error %>
+            </div>
+            <% } %>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Members</th>
+                            <th>VPN Configs</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% teams.forEach(team=> { %>
+                            <tr>
+                                <td>
+                                    <%= team.id %>
+                                </td>
+                                <td>
+                                    <%= team.name %>
+                                </td>
+                                <td>
+                                    <%= team.memberCount %>
+                                </td>
+                                <td>
+                                    <%= team.vpnCount %>
+                                </td>
+                                <td><span class="<%= team.isActive ? 'badge-active' : 'badge-inactive' %>">
+                                        <%= team.isActive ? 'Active' : 'Inactive' %>
+                                    </span></td>
+                                <td>
+                                    <%= new Date(team.createdAt).toLocaleDateString() %>
+                                </td>
+                                <td><a href="/admin/teams/<%= team.id %>">View</a></td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    <% if (pagination.current> 1) { %>
+                        <a href="/admin/teams?page=<%= pagination.current - 1 %>">Previous</a>
+                        <% } %>
+                            <span>Page <%= pagination.current %> of <%= pagination.total %> (<%= pagination.count %>
+                                            total)</span>
+                            <% if (pagination.current < pagination.total) { %>
+                                <a href="/admin/teams?page=<%= pagination.current + 1 %>">Next</a>
+                                <% } %>
+                </div>
+    </div>

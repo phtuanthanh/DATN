@@ -15,6 +15,10 @@ const ScoringGamecontrol = sequelize.define('scoring_gamecontrol', {
         type: DataTypes.STRING,
         allowNull: true
     },
+    services_public: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
     start: {
         type: DataTypes.DATE,
         allowNull: true
@@ -38,6 +42,24 @@ const ScoringGamecontrol = sequelize.define('scoring_gamecontrol', {
     cancel_checks: {
         type: DataTypes.BOOLEAN,
         allowNull: true
+    },
+    min_net_number: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    max_net_number: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    registration_open: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    registration_confirm_text: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        defaultValue: ''
     }
 }, {
     tableName: 'scoring_gamecontrol',

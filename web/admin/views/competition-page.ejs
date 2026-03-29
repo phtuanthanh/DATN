@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competition Management</title>
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #2c3e50;
+        }
+
+        .btn-logout {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #c0392b;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-group input[readonly] {
+            background-color: #f9f9f9;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .form-group input[readonly]::placeholder {
+            color: #999;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #95a5a6;
+            font-size: 12px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+        }
+
+        .info-label {
+            font-size: 11px;
+            color: #95a5a6;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 15px;
+            color: #2c3e50;
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 45px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #bdc3c7;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #3498db;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(21px);
+        }
+
+        /* Air Datepicker Customization */
+        .air-datepicker {
+            border-radius: 6px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .air-datepicker--cell.-selected- {
+            background: #3498db !important;
+            color: white !important;
+        }
+
+        .air-datepicker--cell.-today- {
+            border-color: #3498db !important;
+        }
+
+        .air-datepicker--button {
+            color: #3498db;
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .toast {
+            padding: 14px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            animation: slideInRight 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 44px;
+        }
+
+        .toast-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .toast-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .toast-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .toast-icon {
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .toast-message {
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast.removing {
+            animation: slideOutRight 0.3s ease forwards;
+        }
+
+        /* Flatpickr Theme Customization */
+        .flatpickr-calendar {
+            background: #fff;
+            opacity: 0;
+            display: none;
+            text-align: center;
+            visibility: hidden;
+            animation: none;
+            direction: ltr;
+            border: 0;
+            font-size: 14px;
+            line-height: 24px;
+            border-radius: 8px;
+            position: absolute;
+            width: 307.875px;
+            box-sizing: border-box;
+            touch-action: manipulation;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            z-index: 99999;
+        }
+
+        .flatpickr-calendar.open {
+            opacity: 1;
+            visibility: visible;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .flatpickr-calendar.animate.open {
+            animation: slideInUp 0.3s ease;
+        }
+
+        .flatpickr-calendar .flatpickr-prev-month,
+        .flatpickr-calendar .flatpickr-next-month {
+            color: #3498db;
+            fill: #3498db;
+        }
+
+        .flatpickr-calendar .flatpickr-prev-month:hover,
+        .flatpickr-calendar .flatpickr-next-month:hover {
+            color: #2980b9;
+            fill: #2980b9;
+        }
+
+        .flatpickr-weekdays {
+            background: #f9f9f9;
+            color: #2c3e50;
+        }
+
+        .flatpickr-day {
+            color: #2c3e50;
+            border-radius: 4px;
+        }
+
+        .flatpickr-day.today {
+            border-color: #3498db;
+            background: #e3f2fd;
+            color: #3498db;
+        }
+
+        .flatpickr-day.selected,
+        .flatpickr-day.startRange,
+        .flatpickr-day.endRange,
+        .flatpickr-day.selected.inRange {
+            background: #3498db;
+            border-color: #3498db;
+            color: #fff;
+        }
+
+        .flatpickr-day:hover {
+            background: #ecf0f1;
+            cursor: pointer;
+        }
+
+        .flatpickr-day.selected:hover {
+            background: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .flatpickr-time {
+            max-height: 40px;
+            text-align: center;
+            margin: 0;
+            display: flex;
+            border-top: 1px solid #eee;
+        }
+
+        .numInputWrapper span.arrowUp::after,
+        .numInputWrapper span.arrowDown::after {
+            border-color: #3498db;
+        }
+
+        .flatpickr-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #bdc3c7;
+            padding: 10px 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <%- include('_taskbar', { currentTab: 'competition' }) %>
+            <% if (typeof error !=='undefined' && error) { %>
+                <div class="alert alert-error">
+                    ❌ <%= error %>
+                </div>
+                <% } %>
+                    <% if (typeof success !=='undefined' && success) { %>
+                        <div class="alert alert-success">
+                            ✓ <%= success %>
+                        </div>
+                        <% } %>
+
+                            <div class="content-grid">
+                                <!-- Form Section -->
+                                <div class="card">
+                                    <h2>📝 Edit Competition</h2>
+                                    <form id="competitionForm">
+                                        <!-- Basic Info -->
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="competitionName">Competition Name *</label>
+                                                <input type="text" id="competitionName" name="competition_name"
+                                                    value="<%= competition ? competition.competitionName : '' %>"
+                                                    required>
+                                                <small>Tên cuộc thi</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="flagPrefix">Flag Prefix *</label>
+                                                <input type="text" id="flagPrefix" name="flag_prefix"
+                                                    value="<%= competition ? competition.flagPrefix : '' %>"
+                                                    placeholder="e.g., FLAG{" required>
+                                                <small>Định dạng flag</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Timing -->
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="servicesPublic">📅 Services Public *</label>
+                                                <input type="text" id="servicesPublic" name="services_public"
+                                                    value="<%= competition && competition.servicesPublicRaw ? competition.servicesPublicRaw : '' %>"
+                                                    placeholder="d/m/yyyy H:mm (e.g. 29/3/2026 14:30)" required>
+                                                <small>Công khai dịch vụ</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="startTime">📅 Start Time *</label>
+                                                <input type="text" id="startTime" name="start"
+                                                    value="<%= competition && competition.startRaw ? competition.startRaw : '' %>"
+                                                    placeholder="d/m/yyyy H:mm (e.g. 30/3/2026 09:00)" required>
+                                                <small>Bắt đầu</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="endTime">📅 End Time *</label>
+                                                <input type="text" id="endTime" name="end"
+                                                    value="<%= competition && competition.endRaw ? competition.endRaw : '' %>"
+                                                    placeholder="d/m/yyyy H:mm (e.g. 31/3/2026 18:00)" required>
+                                                <small>Kết thúc</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tick & Network -->
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="tickDuration">Tick Duration (seconds) *</label>
+                                                <input type="number" id="tickDuration" name="tick_duration"
+                                                    value="<%= competition ? competition.tickDuration : '60' %>" min="1"
+                                                    required>
+                                                <small>Khoảng thời gian tick</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="minNetNumber">Min Network (0-255) *</label>
+                                                <input type="number" id="minNetNumber" name="min_net_number"
+                                                    value="<%= competition ? competition.minNetNumber : '0' %>" min="0"
+                                                    max="255" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="maxNetNumber">Max Network (0-255) *</label>
+                                                <input type="number" id="maxNetNumber" name="max_net_number"
+                                                    value="<%= competition ? competition.maxNetNumber : '255' %>"
+                                                    min="0" max="255" required>
+                                            </div>
+                                        </div>
+
+                                        <!-- Registration & Other Options -->
+                                        <div class="form-group">
+                                            <label>Registration Open</label>
+                                            <div class="toggle-switch">
+                                                <label class="switch">
+                                                    <input type="checkbox" id="registrationOpen"
+                                                        name="registration_open" <%=competition &&
+                                                        competition.registrationOpen ? 'checked' : '' %>>
+                                                    <span class="slider"></span>
+                                                </label>
+                                                <span id="regStatus">
+                                                    <%= competition && competition.registrationOpen ? 'Mở' : 'Đóng' %>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="registrationConfirmText">Confirm Text *</label>
+                                            <textarea id="registrationConfirmText" name="registration_confirm_text"
+                                                rows="2" placeholder="e.g., HIII"
+                                                required><%= competition ? competition.registrationConfirmText : '' %></textarea>
+                                            <small>Thông điệp xác nhận</small>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Cancel Checks</label>
+                                            <div class="toggle-switch">
+                                                <label class="switch">
+                                                    <input type="checkbox" id="cancelChecks" name="cancel_checks"
+                                                        <%=competition && competition.cancelChecks ? 'checked' : '' %>>
+                                                    <span class="slider"></span>
+                                                </label>
+                                                <span id="cancelStatus">
+                                                    <%= competition && competition.cancelChecks ? 'On' : 'Off' %>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="button-group">
+                                            <button type="submit" class="btn btn-primary">💾 Save</button>
+                                            <button type="reset" class="btn btn-secondary">🔄 Reset</button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Status Section -->
+                                <div class="card">
+                                    <h2>📊 Current Status</h2>
+                                    <% if (competition) { %>
+                                        <div style="text-align: center; margin-bottom: 20px;">
+                                            <span
+                                                class="status-badge <%= competition.isActive ? 'status-active' : 'status-inactive' %>">
+                                                <%= competition.isActive ? '🟢 ACTIVE' : '🔴 INACTIVE' %>
+                                            </span>
+                                        </div>
+
+                                        <h3 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">
+                                            <%= competition.competitionName || 'N/A' %>
+                                        </h3>
+
+                                        <div class="info-grid">
+                                            <div class="info-card">
+                                                <div class="info-label">Flag Prefix</div>
+                                                <div class="info-value" style="font-family: monospace;">
+                                                    <%= competition.flagPrefix %>
+                                                </div>
+                                            </div>
+                                            <div class="info-card">
+                                                <div class="info-label">Services Public</div>
+                                                <div class="info-value">
+                                                    <%= competition.servicesPublicTime %>
+                                                </div>
+                                            </div>
+                                            <div class="info-card">
+                                                <div class="info-label">Start Time</div>
+                                                <div class="info-value">
+                                                    <%= competition.startTime %>
+                                                </div>
+                                            </div>
+                                            <div class="info-card">
+                                                <div class="info-label">End Time</div>
+                                                <div class="info-value">
+                                                    <%= competition.endTime %>
+                                                </div>
+                                            </div>
+                                            <div class="info-card">
+                                                <div class="info-label">Tick Duration</div>
+                                                <div class="info-value">
+                                                    <%= competition.tickDuration %> sec
+                                                </div>
+                                            </div>
+                                            <div class="info-card">
+                                                <div class="info-label">Valid Ticks</div>
+                                                <div class="info-value">
+                                                    <%= competition.validTicks %>
+                                                </div>
+                                            </div>
+                                            <div class="info-card">
+                                                <div class="info-label">Network Range</div>
+                                                <div class="info-value" style="font-family: monospace;">
+                                                    <%= competition.minNetNumber %> - <%= competition.maxNetNumber %>
+                                                </div>
+                                            </div>
+                                            <div class="info-card">
+                                                <div class="info-label">Registration</div>
+                                                <div class="info-value">
+                                                    <%= competition.registrationOpen ? '✓ Open' : '✗ Closed' %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% } else { %>
+                                            <div style="text-align: center; padding: 40px 20px; color: #95a5a6;">
+                                                <div style="font-size: 40px; margin-bottom: 10px;">🚀</div>
+                                                <p>No competition configured yet</p>
+                                                <p style="font-size: 12px; margin-top: 10px;">Fill the form to create
+                                                    one
+                                                </p>
+                                            </div>
+                                            <% } %>
+                                </div>
+                            </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Flatpickr JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // Initialize Flatpickr with common options
+        const flatpickrOptions = {
+            mode: 'single',
+            enableTime: true,
+            dateFormat: 'd/m/Y H:i',
+            time_24hr: true,
+            minuteIncrement: 1,
+            static: false
+        };
+
+        flatpickr('#servicesPublic', flatpickrOptions);
+        flatpickr('#startTime', flatpickrOptions);
+        flatpickr('#endTime', flatpickrOptions);
+
+        // Toast notification functions
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+
+            let icon = 'ℹ️';
+            if (type === 'success') icon = '✓';
+            if (type === 'error') icon = '❌';
+
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <div class="toast-message">${message}</div>
+                <button class="toast-close" onclick="this.parentElement.remove();">✕</button>
+            `;
+
+            container.appendChild(toast);
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.classList.add('removing');
+                        setTimeout(() => toast.remove(), 300);
+                    }
+                }, duration);
+            }
+        }
+
+        function showMultipleErrors(errors) {
+            errors.forEach(error => {
+                showToast(error, 'error', 6000);
+            });
+        }
+
+        // Toggle status labels
+        document.getElementById('registrationOpen').addEventListener('change', function () {
+            document.getElementById('regStatus').textContent = this.checked ? 'Mở' : 'Đóng';
+        });
+
+        document.getElementById('cancelChecks').addEventListener('change', function () {
+            document.getElementById('cancelStatus').textContent = this.checked ? 'On' : 'Off';
+        });
+
+        // Form submission with comprehensive validation
+        document.getElementById('competitionForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = {
+                competition_name: document.getElementById('competitionName').value.trim(),
+                flag_prefix: document.getElementById('flagPrefix').value.trim(),
+                services_public: document.getElementById('servicesPublic').value.trim(),
+                start: document.getElementById('startTime').value.trim(),
+                end: document.getElementById('endTime').value.trim(),
+                tick_duration: document.getElementById('tickDuration').value.trim(),
+                min_net_number: document.getElementById('minNetNumber').value.trim(),
+                max_net_number: document.getElementById('maxNetNumber').value.trim(),
+                registration_open: document.getElementById('registrationOpen').checked,
+                registration_confirm_text: document.getElementById('registrationConfirmText').value.trim(),
+                cancel_checks: document.getElementById('cancelChecks').checked
+            };
+
+            const errors = [];
+
+            // === TYPE VALIDATION ===
+            if (!formData.competition_name || formData.competition_name === '') {
+                errors.push('Competition name is required');
+            } else if (typeof formData.competition_name !== 'string') {
+                errors.push('Competition name must be text');
+            }
+
+            if (!formData.flag_prefix) {
+                errors.push('Flag prefix is required');
+            } else if (typeof formData.flag_prefix !== 'string') {
+                errors.push('Flag prefix must be text');
+            }
+
+            if (!formData.registration_confirm_text) {
+                errors.push('Registration confirm text is required');
+            } else if (typeof formData.registration_confirm_text !== 'string') {
+                errors.push('Registration confirm text must be text');
+            }
+
+            // === INTEGER VALIDATION ===
+            const tickDuration = parseInt(formData.tick_duration);
+            if (!formData.tick_duration || formData.tick_duration === '') {
+                errors.push('Tick duration is required');
+            } else if (isNaN(tickDuration) || !Number.isInteger(tickDuration) || tickDuration < 1) {
+                errors.push('Tick duration must be a positive integer');
+            }
+
+            const minNet = parseInt(formData.min_net_number);
+            if (!formData.min_net_number || formData.min_net_number === '') {
+                errors.push('Min network number is required');
+            } else if (isNaN(minNet) || !Number.isInteger(minNet) || minNet < 0 || minNet > 255) {
+                errors.push('Min network number must be an integer between 0-255');
+            }
+
+            const maxNet = parseInt(formData.max_net_number);
+            if (!formData.max_net_number || formData.max_net_number === '') {
+                errors.push('Max network number is required');
+            } else if (isNaN(maxNet) || !Number.isInteger(maxNet) || maxNet < 0 || maxNet > 255) {
+                errors.push('Max network number must be an integer between 0-255');
+            }
+
+            // === BOOLEAN VALIDATION ===
+            if (typeof formData.registration_open !== 'boolean') {
+                errors.push('Registration open must be true or false');
+            }
+            if (typeof formData.cancel_checks !== 'boolean') {
+                errors.push('Cancel checks must be true or false');
+            }
+
+            // Return early if there are errors
+            if (errors.length > 0) {
+                showMultipleErrors(errors);
+                return;
+            }
+
+            // === DATE VALIDATION ===
+            const parseDate = (dateStr) => {
+                // Parse format: d/m/Y H:i or dd/mm/yyyy HH:mm (with or without zero padding)
+                const parts = dateStr.match(/(\d+)\/(\d+)\/(\d+)\s(\d+):(\d+)/);
+                if (!parts) return null;
+                // parts[1] = day, parts[2] = month, parts[3] = year, parts[4] = hours, parts[5] = minutes
+                return new Date(parts[3], parts[2] - 1, parts[1], parts[4], parts[5]);
+            };
+
+            if (!formData.services_public) {
+                errors.push('Services Public time is required');
+            }
+            if (!formData.start) {
+                errors.push('Start time is required');
+            }
+            if (!formData.end) {
+                errors.push('End time is required');
+            }
+
+            if (errors.length > 0) {
+                showMultipleErrors(errors);
+                return;
+            }
+
+            const servicesPublic = parseDate(formData.services_public);
+            const start = parseDate(formData.start);
+            const end = parseDate(formData.end);
+
+            if (!servicesPublic || isNaN(servicesPublic.getTime())) {
+                errors.push('Services Public time is not a valid date');
+            }
+            if (!start || isNaN(start.getTime())) {
+                errors.push('Start time is not a valid date');
+            }
+            if (!end || isNaN(end.getTime())) {
+                errors.push('End time is not a valid date');
+            }
+
+            if (errors.length > 0) {
+                showMultipleErrors(errors);
+                return;
+            }
+
+            // === BUSINESS LOGIC VALIDATION ===
+
+            // Check services_public must be after now
+            const now = new Date();
+            if (servicesPublic <= now) {
+                errors.push('Services Public time must be in the future (after now)');
+            }
+
+            // Check time ordering
+            if (servicesPublic >= start) {
+                errors.push('Services Public time must be before Start time');
+            }
+            if (start >= end) {
+                errors.push('Start time must be before End time');
+            }
+
+            // Check network range
+            if (!isNaN(minNet) && !isNaN(maxNet) && minNet > maxNet) {
+                errors.push('Min network number cannot be greater than max network number');
+            }
+
+            // Check tick divisibility
+            const durationSeconds = Math.floor((end - start) / 1000);
+            if (durationSeconds <= 0) {
+                errors.push('Duration must be positive');
+            } else if (durationSeconds % tickDuration !== 0) {
+                errors.push(`Duration (${durationSeconds}s) must be divisible by tick (${tickDuration}s). Remainder: ${durationSeconds % tickDuration}s`);
+            }
+
+            if (errors.length > 0) {
+                showMultipleErrors(errors);
+                return;
+            }
+
+            // === SUBMIT ===
+            try {
+                const response = await fetch('/admin/competition-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast('💾 Saved successfully! Reloading...', 'success', 2000);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    if (result.error && typeof result.error === 'string') {
+                        showToast(result.error, 'error', 6000);
+                    } else {
+                        showToast('Failed to save competition', 'error', 6000);
+                    }
+                }
+            } catch (err) {
+                showToast('Network error: ' + err.message, 'error', 6000);
+            }
+        });
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/admin/logout';
+            }
+        }
+    </script>
+</body>
+
+</html>

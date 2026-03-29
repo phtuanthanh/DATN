@@ -24,9 +24,9 @@ const syncModels = async () => {
     try {
         await sequelize.authenticate();
         console.log('Database connection established successfully.');
-        // Use alter: true to modify existing tables to match models
-        // This adds/updates columns without dropping data
-        await sequelize.sync({ alter: true });
+        // Use alter: false to skip schema modification
+        // Models should match existing database schema
+        await sequelize.sync({ alter: false });
         console.log('All models synchronized successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);

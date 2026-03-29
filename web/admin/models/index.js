@@ -6,6 +6,8 @@ const Team = require('../../client/models/teamModel');
 const VPNTeam = require('../../client/models/vpnTeamModel');
 const VPNUser = require('../../client/models/vpnUserModel');
 const ScoringGamecontrol = require('./scoringGamecontrol');
+const ScoringScoreboard = require('./scoringScoreboard');
+const ScoringService = require('./scoringService');
 
 // Define relationships
 Team.hasMany(User, { foreignKey: 'teamId', as: 'members' });
@@ -48,5 +50,7 @@ module.exports = {
     VPNTeam,
     VPNUser,
     ScoringGamecontrol,
+    ScoringScoreboard,
+    ScoringService,
     syncModels
 };

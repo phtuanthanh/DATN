@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const userServices = require('../services/userServices');
 const auth = require('../middleware/authMiddleware');
+const { VPNUser } = require('../models');
 const UPLOAD_DIR = path.join(__dirname, '../public/uploads/avatars');
 
 // Ensure upload directory exists
@@ -11,14 +12,19 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 }
 
 const GetLogin = (req, res) => {
-    let token = req.cookies.authToken;
-    if (!token) {
-        res.render('login', {
-            title: 'Login - AD Challenge',
-            error: null
-        });
-    } else {
-        res.redirect('/dashboard');
+    try {
+        let token = req.cookies.authToken;
+        if (!token) {
+            res.render('login', {
+                title: 'Login - AD Challenge',
+                error: null
+            });
+        } else {
+            res.redirect('/dashboard');
+        }
+    } catch (error) {
+        console.error('GetLogin error:', error);
+        res.status(500).send('Error loading login page: ' + error.message);
     }
 };
 
@@ -55,14 +61,19 @@ const PostLogin = async (req, res) => {
 };
 
 const GetResgiter = (req, res) => {
-    let token = req.cookies.authToken;
-    if (!token) {
-        res.render('resgiter', {
-            title: 'Register - AD Challenge',
-            error: null
-        });
-    } else {
-        res.redirect('/dashboard');
+    try {
+        let token = req.cookies.authToken;
+        if (!token) {
+            res.render('resgiter', {
+                title: 'Register - AD Challenge',
+                error: null
+            });
+        } else {
+            res.redirect('/dashboard');
+        }
+    } catch (error) {
+        console.error('GetResgiter error:', error);
+        res.status(500).send('Error loading register page: ' + error.message);
     }
 };
 
@@ -103,6 +114,22 @@ const PostResgiter = async (req, res) => {
         );
 
         if (result.success) {
+            // Create VPNUser record for the new user
+            try {
+                const vpnRecord = await VPNUser.create({
+                    idUser: result.user.id,
+                    idTeam: null,
+                    nameVpn: result.user.slug_name,
+                    path: null,
+                    ipVpn: null,
+                    statusVpn: null
+                });
+                console.log(`✓ Created VPNUser record for user ${result.user.id}:`, vpnRecord.dataValues);
+            } catch (vpnError) {
+                console.error(`✗ Failed to create VPNUser record for user ${result.user.id}:`, vpnError.message);
+                // Continue anyway - don't fail registration if VPN record fails
+            }
+
             const token = auth.generateToken({ id: result.user.id, email: result.user.email, username: result.user.username });
 
             // Set token in HTTP-only cookie

@@ -44,6 +44,11 @@ const User = sequelize.define('User', {
         type: DataTypes.BOOLEAN,
         defaultValue: true
     },
+    slug_name: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        comment: 'Format: AD_<id_user>_<username>'
+    },
     createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW

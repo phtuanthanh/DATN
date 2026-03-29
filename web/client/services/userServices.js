@@ -46,6 +46,17 @@ const validateEmail = (email) => {
 };
 
 /**
+ * Validate username - alphanumeric only
+ */
+const validateUsername = (username) => {
+    const usernameRegex = /^[a-zA-Z0-9]+$/;
+    if (!usernameRegex.test(username)) {
+        return { valid: false, message: 'Username must contain only letters and numbers' };
+    }
+    return { valid: true };
+};
+
+/**
  * Hash password
  */
 const hashPassword = async (password) => {
@@ -66,6 +77,18 @@ const comparePassword = async (password, hashedPassword) => {
     } catch (error) {
         throw new Error('Password comparison error: ' + error.message);
     }
+};
+
+/**
+ * Generate slug for user
+ * Format: AD_<id_user>_<username>
+ * @param {number} userId - User ID
+ * @param {string} username - Username (should be alphanumeric)
+ * @returns {string} Generated slug
+ */
+const generateSlugUser = (userId, username) => {
+    const sanitizedName = username.trim().replace(/[^a-zA-Z0-9]/g, '');
+    return `AD_${userId}_${sanitizedName}`;
 };
 
 const handleAvatarUpload = (file, oldAvatarPath) => {
@@ -197,6 +220,15 @@ const register = async (username, email, fullName, password, passwordConfirm, av
             };
         }
 
+        // Validate username
+        const usernameValidation = validateUsername(username);
+        if (!usernameValidation.valid) {
+            return {
+                success: false,
+                message: usernameValidation.message
+            };
+        }
+
         // Validate password
         if (password !== passwordConfirm) {
             return {
@@ -240,6 +272,12 @@ const register = async (username, email, fullName, password, passwordConfirm, av
             isActive: true
         });
 
+        // Generate and set slug after user creation (when ID is available)
+        const userSlug = generateSlugUser(newUser.id, newUser.username);
+        await newUser.update({ slug_name: userSlug });
+
+        // Note: VPNUser record will be created when user joins a team or via vpn-status-user.py script
+
         return {
             success: true,
             message: 'Registration successful',
@@ -248,7 +286,8 @@ const register = async (username, email, fullName, password, passwordConfirm, av
                 username: newUser.username,
                 email: newUser.email,
                 fullName: newUser.fullName,
-                avatar: newUser.avatar
+                avatar: newUser.avatar,
+                slug_name: userSlug
             }
         };
     } catch (error) {
@@ -377,6 +416,8 @@ module.exports = {
     handleAvatarUpload,
     validatePassword,
     validateEmail,
+    validateUsername,
     hashPassword,
+    generateSlugUser,
     comparePassword
 };

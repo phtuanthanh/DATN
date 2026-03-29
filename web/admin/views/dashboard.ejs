@@ -1,237 +1,435 @@
 <div class="dashboard">
-    <!-- Taskbar Navigation -->
-    <div class="dashboard-taskbar">
-        <div class="taskbar-tabs">
-            <button class="tab-btn active" data-tab="competition">
-                <span class="tab-icon">🏆</span>
-                Competition
-            </button>
-            <button class="tab-btn" data-tab="vpn">
-                <span class="tab-icon">🔐</span>
-                VPN
-            </button>
-            <button class="tab-btn" data-tab="team">
-                <span class="tab-icon">👥</span>
-                Team
-            </button>
-            <button class="tab-btn" data-tab="user">
-                <span class="tab-icon">👤</span>
-                User
-            </button>
-            <button class="tab-btn" data-tab="test">
-                <span class="tab-icon">🧪</span>
-                Test
-            </button>
+    <%- include('_taskbar', { currentTab: 'dashboard' }) %>
+
+        <div class="section-header">
+            <h2>Dashboard Overview</h2>
+            <p class="section-subtitle">Quick summary of competition statistics</p>
         </div>
-    </div>
 
-    <!-- Error Message -->
-    <% if (typeof error !=='undefined' && error) { %>
-        <div class="alert alert-error">
-            <%= error %>
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <p class="stat-value">
+                    <%= stats.totalUsers %>
+                </p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Teams</h3>
+                <p class="stat-value">
+                    <%= stats.totalTeams %>
+                </p>
+            </div>
+            <div class="stat-card">
+                <h3>Active Teams</h3>
+                <p class="stat-value">
+                    <%= stats.activeTeams %>
+                </p>
+            </div>
+            <div class="stat-card">
+                <h3>VPN Configs</h3>
+                <p class="stat-value">
+                    <%= stats.vpnTeamConfigs %>
+                </p>
+            </div>
         </div>
-        <% } %>
 
-            <!-- COMPETITION TAB -->
-            <div id="competition-section" class="tab-content active">
-                <div class="section-header">
-                    <h2>Competition Information</h2>
-                    <p class="section-subtitle">Basic competition settings and status</p>
-                </div>
-
-                <div class="competition-container">
-                    <div class="competition-overview">
-                        <% if (competition) { %>
-                            <div class="competition-status">
-                                <div class="status-badge <%= competition.isActive ? 'active' : 'inactive' %>">
-                                    <%= competition.isActive ? '🟢 ACTIVE' : '🔴 INACTIVE' %>
-                                </div>
-                                <h3>
-                                    <%= competition.competitionName %>
-                                </h3>
-                            </div>
-
-                            <div class="competition-grid">
-                                <div class="info-card">
-                                    <label>Competition Name</label>
-                                    <p class="info-value">
-                                        <%= competition.competitionName %>
-                                    </p>
-                                </div>
-                                <div class="info-card">
-                                    <label>Flag Prefix</label>
-                                    <p class="info-value"><code><%= competition.flagPrefix %></code></p>
-                                </div>
-                                <div class="info-card">
-                                    <label>Start Time</label>
-                                    <p class="info-value">
-                                        <%= competition.startTime %>
-                                    </p>
-                                </div>
-                                <div class="info-card">
-                                    <label>End Time</label>
-                                    <p class="info-value">
-                                        <%= competition.endTime %>
-                                    </p>
-                                </div>
-                                <div class="info-card">
-                                    <label>Current Tick</label>
-                                    <p class="info-value"><strong>
-                                            <%= competition.currentTick %>
-                                        </strong></p>
-                                </div>
-                                <div class="info-card">
-                                    <label>Valid Ticks</label>
-                                    <p class="info-value">
-                                        <%= competition.validTicks %>
-                                    </p>
-                                </div>
-                                <div class="info-card">
-                                    <label>Tick Duration (seconds)</label>
-                                    <p class="info-value">
-                                        <%= competition.tickDuration %>
-                                    </p>
-                                </div>
-                                <div class="info-card">
-                                    <label>Cancel Checks</label>
-                                    <p class="info-value">
-                                        <span
-                                            class="badge <%= competition.cancelChecks ? 'badge-warning' : 'badge-success' %>">
-                                            <%= competition.cancelChecks ? 'YES' : 'NO' %>
-                                        </span>
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="competition-actions">
-                                <button class="btn btn-primary" onclick="editCompetition()">Edit
-                                    Competition</button>
-                                <button class="btn btn-secondary" onclick="viewScoring()">View Scoring</button>
-                            </div>
-                            <% } else { %>
-                                <div class="alert alert-warning">
-                                    <p>No competition data found. Please configure competition settings first.</p>
-                                    <button class="btn btn-primary" onclick="createCompetition()">Create
-                                        Competition</button>
-                                </div>
-                                <% } %>
+        <!-- Competition Status -->
+        <div class="dashboard-section">
+            <h2>Competition Status</h2>
+            <% if (competition) { %>
+                <div class="competition-status-card">
+                    <div class="status-badge <%= competition.isActive ? 'active' : 'inactive' %>">
+                        <%= competition.isActive ? '🟢 ACTIVE' : '🔴 INACTIVE' %>
                     </div>
+                    <h3>
+                        <%= competition.competitionName %>
+                    </h3>
 
-                    <!-- Quick Stats -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h3>Total Users</h3>
-                            <p class="stat-value">
-                                <%= stats.totalUsers %>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Flag Prefix:</label>
+                            <p><code><%= competition.flagPrefix %></code></p>
+                        </div>
+                        <div class="info-item">
+                            <label>Current Tick:</label>
+                            <p><strong>
+                                    <%= competition.currentTick %>
+                                </strong></p>
+                        </div>
+                        <div class="info-item">
+                            <label>Start Time:</label>
+                            <p>
+                                <%= competition.startTime %>
                             </p>
                         </div>
-                        <div class="stat-card">
-                            <h3>Total Teams</h3>
-                            <p class="stat-value">
-                                <%= stats.totalTeams %>
-                            </p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Active Teams</h3>
-                            <p class="stat-value">
-                                <%= stats.activeTeams %>
-                            </p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>VPN Team Configs</h3>
-                            <p class="stat-value">
-                                <%= stats.vpnTeamConfigs %>
+                        <div class="info-item">
+                            <label>End Time:</label>
+                            <p>
+                                <%= competition.endTime %>
                             </p>
                         </div>
                     </div>
                 </div>
-            </div>
+                <% } else { %>
+                    <div class="alert alert-warning">
+                        <p>No competition data found.</p>
+                    </div>
+                    <% } %>
+        </div>
 
-            <!-- VPN TAB -->
-            <div id="vpn-section" class="tab-content">
-                <div class="section-header">
-                    <h2>VPN Configuration</h2>
-                    <p class="section-subtitle">Manage VPN settings for teams and users</p>
-                </div>
-                <div class="dashboard-section">
-                    <p>VPN management section - Coming soon</p>
-                </div>
+        <!-- Live Scoreboard -->
+        <div class="dashboard-section">
+            <h2>Live Scoreboard</h2>
+            <div id="scoreboard-container" class="scoreboard-container">
+                <p style="text-align: center; padding: 20px;">Loading scoreboard...</p>
             </div>
-
-            <!-- TEAM TAB -->
-            <div id="team-section" class="tab-content">
-                <div class="section-header">
-                    <h2>Teams Management</h2>
-                    <p class="section-subtitle">View and manage competition teams</p>
-                </div>
-                <div class="dashboard-section">
-                    <p>Teams management section - Coming soon</p>
-                </div>
-            </div>
-
-            <!-- USER TAB -->
-            <div id="user-section" class="tab-content">
-                <div class="section-header">
-                    <h2>Users Management</h2>
-                    <p class="section-subtitle">View and manage system users</p>
-                </div>
-                <div class="dashboard-section">
-                    <p>Users management section - Coming soon</p>
-                </div>
-            </div>
-
-            <!-- TEST TAB -->
-            <div id="test-section" class="tab-content">
-                <div class="section-header">
-                    <h2>Test & Diagnostics</h2>
-                    <p class="section-subtitle">Test various system components</p>
-                </div>
-                <div class="dashboard-section">
-                    <p>Test section - Coming soon</p>
-                </div>
-            </div>
+        </div>
 </div>
 
-<script>
-    // Tab switching functionality
-    document.querySelectorAll('.tab-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            const tabName = this.getAttribute('data-tab');
-            switchTab(tabName);
-        });
-    });
+<style>
+    .competition-status-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        padding: 25px;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+    }
 
-    function switchTab(tabName) {
-        // Hide all sections
-        document.querySelectorAll('.tab-content').forEach(section => {
-            section.classList.remove('active');
-        });
+    .competition-status-card h3 {
+        margin: 15px 0;
+        color: #2c3e50;
+    }
 
-        // Deactivate all buttons
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
+    .status-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 14px;
+    }
 
-        // Show selected section
-        const selectedSection = document.getElementById(tabName + '-section');
-        if (selectedSection) {
-            selectedSection.classList.add('active');
+    .status-badge.active {
+        background: #d5f4e6;
+        color: #27ae60;
+    }
+
+    .status-badge.inactive {
+        background: #fadbd8;
+        color: #c0392b;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 15px;
+    }
+
+    .info-item {
+        padding: 10px;
+    }
+
+    .info-item label {
+        font-weight: 600;
+        color: #7f8c8d;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .info-item p {
+        color: #2c3e50;
+    }
+
+    .info-item code {
+        background: #ecf0f1;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: monospace;
+    }
+
+    /* Scoreboard Styles */
+    .scoreboard-container {
+        width: 100%;
+        overflow-x: auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .scoreboard-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .scoreboard-table thead {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .scoreboard-table th {
+        padding: 15px 10px;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid #1a252f;
+    }
+
+    .scoreboard-table th.rank {
+        width: 50px;
+    }
+
+    .scoreboard-table th.team {
+        min-width: 200px;
+    }
+
+    .scoreboard-table th.service {
+        min-width: 120px;
+        text-align: center;
+    }
+
+    .scoreboard-table th.total {
+        min-width: 100px;
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    }
+
+    .scoreboard-table tbody tr {
+        border-bottom: 1px solid #ecf0f1;
+        transition: background-color 0.2s ease;
+    }
+
+    .scoreboard-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .scoreboard-table tbody tr.rank-1 {
+        background: #fffacd;
+        border-left: 4px solid #f39c12;
+    }
+
+    .scoreboard-table tbody tr.rank-2 {
+        background: #f5f5f5;
+        border-left: 4px solid #bdc3c7;
+    }
+
+    .scoreboard-table tbody tr.rank-3 {
+        background: #fff8e1;
+        border-left: 4px solid #e8b577;
+    }
+
+    .scoreboard-table td {
+        padding: 12px 10px;
+        color: #2c3e50;
+    }
+
+    .scoreboard-table td.rank {
+        font-weight: 700;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .scoreboard-table td.rank.rank-1 {
+        color: #f39c12;
+    }
+
+    .scoreboard-table td.rank.rank-2 {
+        color: #bdc3c7;
+    }
+
+    .scoreboard-table td.rank.rank-3 {
+        color: #e8b577;
+    }
+
+    .team-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .team-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .team-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .score-box {
+        text-align: center;
+        padding: 8px 4px;
+    }
+
+    .score-label {
+        font-size: 11px;
+        color: #7f8c8d;
+        text-transform: uppercase;
+    }
+
+    .score-value {
+        font-weight: 700;
+        font-size: 14px;
+        color: #2c3e50;
+        margin-top: 3px;
+    }
+
+    .score-value.attack {
+        color: #e74c3c;
+    }
+
+    .score-value.defense {
+        color: #27ae60;
+    }
+
+    .score-value.sla {
+        color: #f39c12;
+    }
+
+    .total-score {
+        text-align: center;
+        font-weight: 700;
+        font-size: 16px;
+        background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+        padding: 12px;
+        border-radius: 5px;
+        color: #2c3e50;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #95a5a6;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+
+    @media (max-width: 1200px) {
+
+        .scoreboard-table th,
+        .scoreboard-table td {
+            padding: 10px 6px;
+            font-size: 12px;
         }
+    }
+</style>
 
-        // Activate selected button
-        event.target.closest('.tab-btn').classList.add('active');
+<script>
+    async function loadScoreboard() {
+        try {
+            const response = await fetch('/admin/api/scoreboard');
+            const data = await response.json();
+
+            if (!data.teams || data.teams.length === 0) {
+                document.getElementById('scoreboard-container').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <p>No scoreboard data available yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const services = data.services || [];
+
+            let html = `
+                <table class="scoreboard-table">
+                    <thead>
+                        <tr>
+                            <th class="rank">#</th>
+                            <th class="team">Team</th>
+            `;
+
+            // Add service headers
+            services.forEach(service => {
+                html += `
+                    <th class="service">
+                        <div>${service}</div>
+                        <div style="font-size: 11px; color: #bdc3c7; margin-top: 3px;">A/D/S</div>
+                    </th>
+                `;
+            });
+
+            html += `
+                            <th class="total">Total Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            // Add team rows
+            data.teams.forEach((team, index) => {
+                const rank = index + 1;
+                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+
+                html += `
+                    <tr class="${rankClass}">
+                        <td class="rank ${rankClass}">${rank}</td>
+                        <td class="team">
+                            <div class="team-info">
+                                <div class="team-avatar">${team.name.charAt(0).toUpperCase()}</div>
+                                <div class="team-name">${team.name}</div>
+                            </div>
+                        </td>
+                `;
+
+                // Add service scores
+                services.forEach(service => {
+                    const serviceData = team.services[service] || { attack: 0, defense: 0, sla: 0 };
+                    html += `
+                        <td class="service">
+                            <div class="score-box">
+                                <div class="score-value attack">${serviceData.attack.toFixed(1)}</div>
+                                <div class="score-value defense">${serviceData.defense.toFixed(1)}</div>
+                                <div class="score-value sla">${serviceData.sla.toFixed(1)}</div>
+                            </div>
+                        </td>
+                    `;
+                });
+
+                // Add total score
+                html += `
+                        <td>
+                            <div class="total-score">${team.totalScore.toFixed(1)}</div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('scoreboard-container').innerHTML = html;
+        } catch (error) {
+            console.error('Error loading scoreboard:', error);
+            document.getElementById('scoreboard-container').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">⚠️</div>
+                    <p>Error loading scoreboard data</p>
+                </div>
+            `;
+        }
     }
 
-    // Placeholder functions
-    function editCompetition() {
-        alert('Edit Competition - Feature coming soon');
-    }
+    // Load scoreboard on page load
+    loadScoreboard();
 
-    function viewScoring() {
-        alert('View Scoring - Feature coming soon');
-    }
-
-    function createCompetition() {
-        alert('Create Competition - Feature coming soon');
-    }
+    // Refresh scoreboard every 30 seconds
+    setInterval(loadScoreboard, 30000);
 </script>

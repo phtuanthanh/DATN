@@ -1,4 +1,4 @@
-const { User, Team, VPNTeam } = require('../models');
+const { User, Team, VPNTeam, VPNUser } = require('../models');
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
@@ -67,6 +67,18 @@ const generateVpnNames = (teamId, teamName) => {
         typeTrue: `AD_${teamId}_${sanitizedName}_1`,
         typeFalse: `AD_${teamId}_${sanitizedName}_2`
     };
+};
+
+/**
+ * Generate slug_team for team
+ * Format: AD_<id_team>_<name_team>
+ * @param {number} teamId - Team ID
+ * @param {string} teamName - Team name (should be sanitized - alphanumeric)
+ * @returns {string} Generated slug_team
+ */
+const generateSlugTeam = (teamId, teamName) => {
+    const sanitizedName = teamName.trim().replace(/[^a-zA-Z0-9]/g, '');
+    return `AD_${teamId}_${sanitizedName}`;
 };
 
 /**
@@ -231,6 +243,10 @@ const createTeam = async (teamData, userId) => {
             isActive: true
         }, { transaction });
 
+        // Generate and set slug_team
+        const slugTeam = generateSlugTeam(newTeam.id, newTeam.name);
+        await newTeam.update({ slug_team: slugTeam }, { transaction });
+
         // Generate VPN names
         const vpnNames = generateVpnNames(newTeam.id, newTeam.name);
 
@@ -254,6 +270,18 @@ const createTeam = async (teamData, userId) => {
         // Add creator to team
         user.teamId = newTeam.id;
         await user.save({ transaction });
+
+        // Update VPNUser record with team ID
+        try {
+            const updateResult = await VPNUser.update(
+                { idTeam: newTeam.id },
+                { where: { idUser: userId }, transaction }
+            );
+            console.log(`✓ Updated VPNUser for user ${userId} with team ${newTeam.id}, rows affected: ${updateResult[0]}`);
+        } catch (vpnError) {
+            // Continue anyway - don't fail team creation if VPN update fails
+            console.error(`✗ Failed to update VPNUser record for user ${userId}:`, vpnError.message);
+        }
 
         await transaction.commit();
 
@@ -362,6 +390,18 @@ const joinTeamByKey = async (teamKey, userId) => {
         user.teamId = team.id;
         await user.save();
 
+        // Update VPNUser record with team ID
+        try {
+            await VPNUser.update(
+                { idTeam: team.id },
+                { where: { idUser: userId } }
+            );
+            console.log(`✓ Updated VPNUser for user ${userId} with team ${team.id}`);
+        } catch (vpnError) {
+            console.error(`Warning: Could not update VPNUser record:`, vpnError.message);
+            // Continue anyway - don't fail team join if VPN update fails
+        }
+
         return {
             success: true,
             message: 'Joined team successfully',
@@ -417,6 +457,18 @@ const leaveTeam = async (userId) => {
         user.teamId = null;
         await user.save();
 
+        // Update VPNUser record - set idTeam to null
+        try {
+            await VPNUser.update(
+                { idTeam: null },
+                { where: { idUser: userId } }
+            );
+            console.log(`✓ Updated VPNUser for user ${userId} - removed team`);
+        } catch (vpnError) {
+            console.error(`Warning: Could not update VPNUser record:`, vpnError.message);
+            // Continue anyway - don't fail team leave if VPN update fails
+        }
+
         return {
             success: true,
             message: 'Left team successfully'
@@ -434,6 +486,7 @@ module.exports = {
     generateTeamKey,
     validateTeamName,
     generateVpnNames,
+    generateSlugTeam,
     handleTeamImageUpload,
     createTeam,
     getTeamWithMembers,

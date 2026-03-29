@@ -17,7 +17,7 @@ const VPNUser = sequelize.define('VPNUser', {
     },
     idTeam: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
             model: 'teams',
             key: 'id'

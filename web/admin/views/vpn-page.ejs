@@ -1,0 +1,526 @@
+<div class="dashboard">
+    <%- include('_taskbar', { currentTab: 'vpn' }) %>
+
+        <!-- Toast Notification Container -->
+        <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; max-width: 400px;">
+        </div>
+
+        <div class="section-header">
+            <h2>VPN Configuration</h2>
+            <p class="section-subtitle">Manage VPN settings for teams and users</p>
+        </div>
+
+        <!-- VPN Generation Controls -->
+        <div class="dashboard-section">
+            <h3>Generate VPN Configurations</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                <button class="btn btn-primary" onclick="generateVpnTeamsVulnbox()">
+                    Generate Teams VPN (Vulnbox)
+                </button>
+                <button class="btn btn-primary" onclick="generateVpnTeamsTestbox()">
+                    Generate Teams VPN (Testbox)
+                </button>
+                <button class="btn btn-primary" onclick="generateVpnUsers()">
+                    Generate Users VPN
+                </button>
+                <button class="btn btn-secondary" onclick="testEnvironment()" style="background: #95a5a6;">
+                    🔧 Test Environment
+                </button>
+            </div>
+
+            <!-- Output Display -->
+            <div id="vpn-output"
+                style="display: none; background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong>Generation Output:</strong>
+                    <button class="btn btn-small" onclick="clearVpnOutput()">Clear</button>
+                </div>
+                <pre id="vpn-output-text" style="margin: 0; white-space: pre-wrap; word-break: break-word;"></pre>
+            </div>
+        </div>
+
+        <!-- VPN Teams -->
+        <div class="dashboard-section">
+            <h3>VPN Teams</h3>
+            <% if (vpnTeams && vpnTeams.length> 0) { %>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Team Name</th>
+                            <th>Type</th>
+                            <th>VPN Config</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% Object.values(groupedVpnTeams).forEach((teamGroup, idx)=> { %>
+                            <% const teamName=(teamGroup[0].team && teamGroup[0].team.name) ? teamGroup[0].team.name :
+                                (teamGroup[0].nameVpn || 'N/A' ); %>
+                                <% const rowColor=idx % 2===0 ? '#f9f9f9' : '#f0f7ff' ; %>
+
+                                    <!-- Team Group Header -->
+                                    <tr class="team-header"
+                                        style="background-color: <%= idx % 2 === 0 ? '#e8f4f8' : '#f0f4ff' %>; border-top: 3px solid #3498db;">
+                                        <td colspan="5"
+                                            style="padding: 12px; font-weight: 700; font-size: 14px; color: #2c3e50;">
+                                            🏆 Team: <span style="color: #3498db;">
+                                                <%= teamName %>
+                                            </span> (ID: <%= teamGroup[0].idTeam %>)
+                                        </td>
+                                    </tr>
+
+                                    <% teamGroup.forEach((team, itemIdx)=> { %>
+                                        <tr
+                                            style="background-color: <%= rowColor %>; border-left: 3px solid <%= itemIdx === 0 ? '#3498db' : 'transparent' %>;">
+                                            <td style="font-weight: 600; padding: 12px 12px 12px 18px;">
+                                                <%= teamGroup[0].idTeam %>
+                                            </td>
+                                            <td style="font-weight: 500;">
+                                                <%= teamName %>
+                                            </td>
+                                            <td>
+                                                <span class="badge-type <%= team.typeVpn ? 'vuln' : 'test' %>">
+                                                    <%= team.typeVpn ? '🟥 Vulnbox' : '🟦 Testbox' %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <% if (team.path) { %>
+                                                    <button class="btn-download"
+                                                        onclick="downloadVpnConfig('<%= team.path %>', '<%= team.nameVpn %>', 'team')"
+                                                        title="Download VPN Config">📥 Download</button>
+                                                    <% } else { %>
+                                                        <span style="color: #bdc3c7;">Not generated</span>
+                                                        <% } %>
+                                            </td>
+                                            <td>
+                                                <a href="#"
+                                                    style="color: #3498db; text-decoration: none; font-size: 13px;">Edit</a>
+                                                <span style="color: #bdc3c7;">|</span>
+                                                <a href="#"
+                                                    style="color: #e74c3c; text-decoration: none; font-size: 13px;">Delete</a>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% }) %>
+                    </tbody>
+                </table>
+                <% } else { %>
+                    <p>No VPN teams configured yet.</p>
+                    <% } %>
+        </div>
+
+        <!-- VPN Users -->
+        <div class="dashboard-section">
+            <h3>VPN Users</h3>
+            <% if (vpnUsers && vpnUsers.length> 0) { %>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Team</th>
+                            <th>VPN Config</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% let prevTeamId=null; %>
+                            <% let teamIndex=0; %>
+                                <% vpnUsers.forEach((user, idx)=> { %>
+                                    <% const teamId=user.idTeam || 'no-team' ; %>
+                                        <% const teamName=(user.userTeam && user.userTeam.name) ? user.userTeam.name
+                                            : 'No Team' ; %>
+
+                                            <% if (prevTeamId !==teamId) { %>
+                                                <% prevTeamId=teamId; %>
+                                                    <% teamIndex++; %>
+                                                        <tr class="team-header"
+                                                            style="background-color: <%= teamIndex % 2 === 0 ? '#e8f4f8' : '#f0f4ff' %>; border-top: 3px solid #3498db;">
+                                                            <td colspan="5"
+                                                                style="padding: 12px; font-weight: 700; font-size: 14px; color: #2c3e50;">
+                                                                👥 Team: <span style="color: #3498db;">
+                                                                    <%= teamName %>
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                        <% } %>
+
+                                                            <tr
+                                                                style="background-color: <%= teamIndex % 2 === 0 ? '#f8fbfc' : '#f9fbfe' %>; border-left: 3px solid transparent;">
+                                                                <td
+                                                                    style="font-weight: 600; padding: 12px 12px 12px 18px;">
+                                                                    <%= user.idUser %>
+                                                                </td>
+                                                                <td style="font-weight: 500;">
+                                                                    <%= (user.user && user.user.username) ?
+                                                                        user.user.username : (user.username || 'N/A' )
+                                                                        %>
+                                                                </td>
+                                                                <td style="color: #7f8c8d; font-size: 13px;">
+                                                                    <%= teamName %>
+                                                                </td>
+                                                                <td>
+                                                                    <% if (user.path) { %>
+                                                                        <button class="btn-download"
+                                                                            onclick="downloadVpnConfig('<%= user.path %>', '<%= user.nameVpn %>', 'user')"
+                                                                            title="Download VPN Config">📥
+                                                                            Download</button>
+                                                                        <% } else { %>
+                                                                            <span style="color: #bdc3c7;">Not
+                                                                                generated</span>
+                                                                            <% } %>
+                                                                </td>
+                                                                <td>
+                                                                    <a href="#"
+                                                                        style="color: #3498db; text-decoration: none; font-size: 13px;">Edit</a>
+                                                                    <span style="color: #bdc3c7;">|</span>
+                                                                    <a href="#"
+                                                                        style="color: #e74c3c; text-decoration: none; font-size: 13px;">Delete</a>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %>
+                    </tbody>
+                </table>
+                <% } else { %>
+                    <p>No VPN users configured yet.</p>
+                    <% } %>
+        </div>
+
+        <style>
+            .badge {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .badge-success {
+                background: #d5f4e6;
+                color: #27ae60;
+            }
+
+            .badge-type {
+                display: inline-block;
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-size: 12px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+
+            .badge-type.vuln {
+                background: #ffe5e5;
+                color: #c0392b;
+            }
+
+            .badge-type.test {
+                background: #e5f1ff;
+                color: #1e5fb8;
+            }
+
+            .team-header {
+                font-weight: 700 !important;
+            }
+
+            .team-header td {
+                letter-spacing: 0.5px;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                background: #3498db;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+            }
+
+            .btn:hover {
+                background: #2980b9;
+            }
+
+            .btn-small {
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+
+            .btn:disabled {
+                background: #95a5a6;
+                cursor: not-allowed;
+            }
+
+            .table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            }
+
+            .table th,
+            .table td {
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .table th {
+                background: #f5f5f5;
+                font-weight: 600;
+            }
+
+            .btn-download {
+                padding: 6px 12px;
+                background: #27ae60;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 13px;
+                transition: background 0.2s;
+            }
+
+            .btn-download:hover {
+                background: #229954;
+            }
+
+            .btn-download:active {
+                transform: scale(0.98);
+            }
+        </style>
+
+        <script>
+            let isGenerating = false;
+
+            // Toast notification system
+            function showToast(message, type = 'info', duration = 5000) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const id = Math.random().toString(36).substr(2, 9);
+                toast.id = id;
+
+                let bgColor, borderColor, icon;
+                switch (type) {
+                    case 'error':
+                        bgColor = '#f8d7da';
+                        borderColor = '#f5c6cb';
+                        icon = '✗';
+                        break;
+                    case 'warning':
+                        bgColor = '#fff3cd';
+                        borderColor = '#ffeeba';
+                        icon = '⚠';
+                        break;
+                    case 'success':
+                        bgColor = '#d4edda';
+                        borderColor = '#c3e6cb';
+                        icon = '✓';
+                        break;
+                    default:
+                        bgColor = '#d1ecf1';
+                        borderColor = '#bee5eb';
+                        icon = 'ℹ';
+                }
+
+                toast.style.cssText = `
+                    background: ${bgColor};
+                    border: 1px solid ${borderColor};
+                    padding: 12px 16px;
+                    border-radius: 4px;
+                    margin-bottom: 10px;
+                    font-size: 14px;
+                    animation: slideIn 0.3s ease-in-out;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    word-wrap: break-word;
+                    max-width: 100%;
+                `;
+                toast.innerHTML = `<strong style="margin-right: 8px;">${icon}</strong>${message}`;
+
+                container.appendChild(toast);
+
+                if (duration > 0) {
+                    setTimeout(() => {
+                        toast.style.animation = 'slideOut 0.3s ease-in-out';
+                        setTimeout(() => toast.remove(), 300);
+                    }, duration);
+                }
+            }
+
+            // Parse Python output for errors, warnings, success
+            function parseAndNotifyOutput(output) {
+                const lines = output.split('\n');
+                const errors = [];
+                const warnings = [];
+                const successes = [];
+
+                lines.forEach(line => {
+                    const trimmed = line.trim();
+                    if (trimmed.includes('✗')) {
+                        errors.push(trimmed.replace('✗', '').trim());
+                    } else if (trimmed.includes('⚠')) {
+                        warnings.push(trimmed.replace('⚠', '').trim());
+                    } else if (trimmed.includes('✓')) {
+                        successes.push(trimmed.replace('✓', '').trim());
+                    }
+                });
+
+                // Show errors first
+                errors.forEach(error => {
+                    if (error.length > 0) {
+                        showToast(error, 'error', 7000);
+                    }
+                });
+
+                // Show warnings
+                warnings.forEach(warning => {
+                    if (warning.length > 0) {
+                        showToast(warning, 'warning', 6000);
+                    }
+                });
+
+                // Show last success message
+                if (successes.length > 0) {
+                    const lastSuccess = successes[successes.length - 1];
+                    if (lastSuccess.length > 0) {
+                        showToast(lastSuccess, 'success', 5000);
+                    }
+                }
+            }
+
+            async function generateVpnTeamsVulnbox() {
+                await runVpnGeneration('/admin/vpn/generate-teams-vulnbox', 'vulnbox teams');
+            }
+
+            async function generateVpnTeamsTestbox() {
+                await runVpnGeneration('/admin/vpn/generate-teams-testbox', 'testbox teams');
+            }
+
+            async function generateVpnUsers() {
+                await runVpnGeneration('/admin/vpn/generate-users', 'users');
+            }
+
+            async function runVpnGeneration(endpoint, label) {
+                if (isGenerating) {
+                    showToast('Generation already in progress. Please wait.', 'warning', 5000);
+                    return;
+                }
+
+                isGenerating = true;
+                const outputDiv = document.getElementById('vpn-output');
+                const outputText = document.getElementById('vpn-output-text');
+
+                outputDiv.style.display = 'block';
+                outputText.textContent = `Generating ${label} VPN configurations...\n`;
+                showToast(`Starting VPN generation for ${label}...`, 'info', 3000);
+
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        outputText.textContent += `\n✓ ${data.message}\n`;
+                        outputText.textContent += `\n${data.output}`;
+
+                        // Parse and show messages
+                        parseAndNotifyOutput(data.output);
+
+                        // Reload page after 2 seconds to refresh tables
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        outputText.textContent += `\n✗ Error: ${data.message}\n`;
+                        outputText.textContent += `\n${data.error}`;
+
+                        // Show error notifications
+                        showToast(`VPN generation failed: ${data.message}`, 'error', 7000);
+                        parseAndNotifyOutput(data.error);
+                    }
+                } catch (error) {
+                    outputText.textContent += `\n✗ Request failed: ${error.message}\n`;
+                    showToast(`Request failed: ${error.message}`, 'error', 7000);
+                } finally {
+                    isGenerating = false;
+                }
+            }
+
+            function clearVpnOutput() {
+                document.getElementById('vpn-output').style.display = 'none';
+                document.getElementById('vpn-output-text').textContent = '';
+            }
+
+            async function testEnvironment() {
+                showToast('Testing environment...', 'info', 3000);
+                try {
+                    const response = await fetch('/admin/vpn/test-environment', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+
+                    const outputDiv = document.getElementById('vpn-output');
+                    const outputText = document.getElementById('vpn-output-text');
+
+                    outputDiv.style.display = 'block';
+                    outputText.textContent = '[Environment Test Results]\n';
+                    outputText.textContent += `✓ Script Exists: ${data.scriptExists ? 'YES' : 'NO'}\n`;
+                    outputText.textContent += `✓ .env Exists: ${data.envExists ? 'YES' : 'NO'}\n`;
+                    outputText.textContent += `✓ Python Available: ${data.pythonAvailable ? 'YES' : 'NO'}\n`;
+                    outputText.textContent += `✓ Python Version: ${data.pythonVersion.trim()}\n`;
+                    outputText.textContent += `✓ Working Directory: ${data.cwd}\n`;
+                    outputText.textContent += `✓ Timestamp: ${data.timestamp}\n`;
+
+                    const allGood = data.scriptExists && data.envExists && data.pythonAvailable;
+                    if (allGood) {
+                        showToast('✓ All environment checks passed!', 'success', 5000);
+                    } else {
+                        showToast('⚠ Some environment checks failed', 'warning', 5000);
+                    }
+                } catch (error) {
+                    showToast(`Test failed: ${error.message}`, 'error', 7000);
+                }
+            }
+
+            function downloadVpnConfig(filePath, filename, type) {
+                // TODO: Implement download functionality
+                // This will download the VPN config file from the specified path
+                showToast(`Download functionality coming soon for: ${filename}`, 'info', 4000);
+                console.log(`Download request: ${filePath} (${type})`);
+            }
+
+            // Add CSS animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                @keyframes slideOut {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        </script>
+</div>

@@ -12,6 +12,7 @@ body {
 
 .admin-container {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
 }
 
@@ -91,8 +92,28 @@ body {
     color: #2c3e50;
 }
 
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
 .user-info {
     color: #7f8c8d;
+}
+
+.logout-btn {
+    background: #e74c3c;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.logout-btn:hover {
+    background: #c0392b;
 }
 
 .content {
@@ -228,6 +249,7 @@ body {
     justify-content: center;
     gap: 8px;
     white-space: nowrap;
+    text-decoration: none;
 }
 
 .tab-btn:hover {

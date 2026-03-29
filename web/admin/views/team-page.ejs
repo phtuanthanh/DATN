@@ -1,0 +1,74 @@
+<div class="dashboard">
+    <%- include('_taskbar', { currentTab: 'team' }) %>
+
+        <div class="section-header">
+            <h2>Teams Management</h2>
+            <p class="section-subtitle">View and manage competition teams</p>
+        </div>
+
+        <% if (typeof error !=='undefined' && error) { %>
+            <div class="alert alert-error">
+                <%= error %>
+            </div>
+            <% } %>
+
+                <div class="dashboard-section">
+                    <% if (teams && teams.length> 0) { %>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Team ID</th>
+                                    <th>Team Name</th>
+                                    <th>Status</th>
+                                    <th>Members</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% teams.forEach(team=> { %>
+                                    <tr>
+                                        <td>
+                                            <%= team.id %>
+                                        </td>
+                                        <td>
+                                            <%= team.name %>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="badge <%= team.status === 'active' ? 'badge-success' : 'badge-warning' %>">
+                                                <%= team.status %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <%= team.memberCount || 0 %>
+                                        </td>
+                                        <td><a href="#">View</a> | <a href="#">Edit</a></td>
+                                    </tr>
+                                    <% }); %>
+                            </tbody>
+                        </table>
+                        <% } else { %>
+                            <p>No teams found.</p>
+                            <% } %>
+                </div>
+</div>
+
+<style>
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-success {
+        background: #d5f4e6;
+        color: #27ae60;
+    }
+
+    .badge-warning {
+        background: #fef5e7;
+        color: #d68910;
+    }
+</style>

@@ -5,7 +5,7 @@ const router = express.Router();
  * GET /auth/login - Display login page
  */
 router.get('/login', (req, res) => {
-    res.render('auth/login', { errorMessage: null });
+    res.render('auth/login', { errorMessage: null, layout: false });
 });
 
 /**
@@ -18,7 +18,7 @@ router.post('/login', async (req, res) => {
 
         // Validate input
         if (!username || !password) {
-            return res.render('auth/login', { errorMessage: 'Username and password are required' });
+            return res.render('auth/login', { errorMessage: 'Username and password are required', layout: false });
         }
 
         // Hardcoded credentials for demo
@@ -38,10 +38,10 @@ router.post('/login', async (req, res) => {
         }
 
         console.warn(`✗ Failed login attempt with username: ${username}`);
-        res.render('auth/login', { errorMessage: 'Invalid username or password' });
+        res.render('auth/login', { errorMessage: 'Invalid username or password', layout: false });
     } catch (error) {
         console.error('Login error:', error);
-        res.render('auth/login', { errorMessage: 'An error occurred during login' });
+        res.render('auth/login', { errorMessage: 'An error occurred during login', layout: false });
     }
 });
 

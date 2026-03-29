@@ -348,7 +348,21 @@ const updateTeam = async (req, res) => {
 
         // Update team fields
         if (teamName) {
-            userTeam.name = teamName;
+            // Validate team name (alphanumeric only)
+            const nameValidation = teamServices.validateTeamName(teamName);
+            if (!nameValidation.valid) {
+                const teamMembers = await teamServices.getTeamMembers(user.teamId);
+                return res.render('team', {
+                    user: user.dataValues,
+                    userTeam: userTeam.dataValues,
+                    teamMembers: teamMembers,
+                    successMessage: null,
+                    errorMessage: nameValidation.error
+                });
+            }
+            userTeam.name = teamName.trim();
+            // Regenerate slug_team when name changes
+            userTeam.slug_team = teamServices.generateSlugTeam(userTeam.id, teamName.trim());
         }
 
         if (country) {

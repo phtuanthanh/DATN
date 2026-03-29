@@ -41,9 +41,11 @@ const Team = sequelize.define('Team', {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    logo: {
-        type: DataTypes.TEXT,
-        allowNull: true
+    slug_team: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        unique: true,
+        comment: 'Format: AD_<id_team>_<name_team>'
     },
     isActive: {
         type: DataTypes.BOOLEAN,

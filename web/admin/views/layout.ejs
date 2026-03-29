@@ -11,31 +11,18 @@
 
 <body>
     <div class="admin-container">
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2>Admin Panel</h2>
-            </div>
-            <ul class="sidebar-menu">
-                <li><a href="/admin">Dashboard</a></li>
-                <li><a href="/admin/users">Users</a></li>
-                <li><a href="/admin/teams">Teams</a></li>
-                <li><a href="/admin/vpn/teams">VPN Teams</a></li>
-                <li><a href="/admin/vpn/users">VPN Users</a></li>
-            </ul>
-            <div class="sidebar-footer">
-                <a href="/auth/logout">Logout</a>
-            </div>
-        </nav>
-
         <div class="main-content">
             <header class="top-bar">
                 <h1>
                     <% typeof pageTitle !=='undefined' ? pageTitle : 'Dashboard' %>
                 </h1>
-                <div class="user-info">
-                    <span>
-                        <%= typeof username !=='undefined' ? username : 'Admin' %>
-                    </span>
+                <div class="top-bar-right">
+                    <div class="user-info">
+                        <span>
+                            <%= typeof username !=='undefined' ? username : 'Admin' %>
+                        </span>
+                    </div>
+                    <a href="/auth/logout" class="logout-btn">Logout</a>
                 </div>
             </header>
 

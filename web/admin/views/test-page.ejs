@@ -1,0 +1,121 @@
+<div class="dashboard">
+    <%- include('_taskbar', { currentTab: 'test' }) %>
+
+        <div class="section-header">
+            <h2>Test & Diagnostics</h2>
+            <p class="section-subtitle">Test various system components</p>
+        </div>
+
+        <% if (typeof error !=='undefined' && error) { %>
+            <div class="alert alert-error">
+                <%= error %>
+            </div>
+            <% } %>
+
+                <div class="dashboard-section">
+                    <h3>System Health Check</h3>
+                    <div class="test-items">
+                        <div class="test-item">
+                            <span class="test-label">Database Connection</span>
+                            <span class="test-status <%= testResults.database ? 'success' : 'failed' %>">
+                                <%= testResults.database ? '✓ OK' : '✗ Failed' %>
+                            </span>
+                        </div>
+                        <div class="test-item">
+                            <span class="test-label">API Endpoints</span>
+                            <span class="test-status <%= testResults.api ? 'success' : 'failed' %>">
+                                <%= testResults.api ? '✓ OK' : '✗ Failed' %>
+                            </span>
+                        </div>
+                        <div class="test-item">
+                            <span class="test-label">Session Manager</span>
+                            <span class="test-status <%= testResults.session ? 'success' : 'failed' %>">
+                                <%= testResults.session ? '✓ OK' : '✗ Failed' %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-section">
+                    <h3>Diagnostics Tools</h3>
+                    <button class="btn btn-primary" onclick="runDiagnostics()">Run Full Diagnostics</button>
+                    <button class="btn btn-secondary" onclick="viewLogs()">View System Logs</button>
+                </div>
+</div>
+
+<style>
+    .test-items {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .test-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 5px;
+    }
+
+    .test-label {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .test-status {
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 12px;
+    }
+
+    .test-status.success {
+        background: #d5f4e6;
+        color: #27ae60;
+    }
+
+    .test-status.failed {
+        background: #fadbd8;
+        color: #c0392b;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.3s;
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+
+    .btn-primary {
+        background: #3498db;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #2980b9;
+    }
+
+    .btn-secondary {
+        background: #95a5a6;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #7f8c8d;
+    }
+</style>
+
+<script>
+    function runDiagnostics() {
+        alert('Running full diagnostics - Feature coming soon');
+    }
+
+    function viewLogs() {
+        alert('View System Logs - Feature coming soon');
+    }
+</script>

@@ -90,11 +90,6 @@ router.get('/profile', authMiddleware, userController.getProfile);
 router.get('/scoreboard', authMiddleware, userController.getScoreboard);
 
 /**
- * GET /vpn - Display VPN status
- */
-router.get('/vpn', authMiddleware, userController.getVpn);
-
-/**
  * GET /services - Display services
  */
 router.get('/services', authMiddleware, userController.getServices);

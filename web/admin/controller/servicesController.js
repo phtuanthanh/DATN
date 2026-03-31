@@ -7,12 +7,17 @@ const getServicesPage = async (req, res) => {
     try {
         const services = await servicesService.getAllServices();
         res.render('services-page', {
+            username: req.session.username || 'Admin',
             services,
             currentTab: 'services'
         });
     } catch (error) {
         console.error('Error rendering services page:', error);
-        res.status(500).render('error', { error: 'Failed to load services page' });
+        res.render('services-page', {
+            username: req.session.username || 'Admin',
+            services: [],
+            error: 'Failed to load services page'
+        });
     }
 };
 

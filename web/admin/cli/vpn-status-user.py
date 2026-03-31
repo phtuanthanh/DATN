@@ -160,11 +160,28 @@ if login_response.status_code != 200:
 
 print("✓ WireGuard login successful\n")
 
+# Get existing clients to check which ones already exist
+try:
+    existing_clients_response = session.get(URL_WIREGUARD + E_CRE_USERS)
+    existing_clients_response.raise_for_status()
+    existing_data = existing_clients_response.json()
+    existing_clients = existing_data.get('clients', []) if isinstance(existing_data, dict) else existing_data
+    existing_names = [client.get('name', '').lower() for client in existing_clients]
+except Exception as e:
+    print(f"⚠ Could not fetch existing clients: {e}")
+    existing_names = []
+
 # First pass: Create VPN clients with _user suffix
 print("Creating VPN clients...")
 for user in users:
     user_id, user_slug, team_id = user[0], user[1], user[2]
     user_vpn_name = user_slug + "_user"
+    
+    # Check if client already exists
+    if user_vpn_name.lower() in existing_names:
+        print(f"  ⊘ Already exists: {user_vpn_name}")
+        continue
+    
     r = session.post(
         URL_WIREGUARD + E_CRE_USERS,
         json={'name': user_vpn_name, 'expiresAt': ExpiresAt}

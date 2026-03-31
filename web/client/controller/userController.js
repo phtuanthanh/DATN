@@ -296,22 +296,6 @@ exports.getScoreboard = async (req, res) => {
 };
 
 /**
- * GET /vpn - Display VPN status
- */
-exports.getVpn = async (req, res) => {
-    try {
-        const { User } = require('../models');
-        const user = await User.findByPk(req.user.id, {
-            attributes: { exclude: ['password'] }
-        });
-        res.render('vpn', { user: user ? user.dataValues : req.user });
-    } catch (error) {
-        console.error('VPN page error:', error);
-        res.render('vpn', { user: req.user });
-    }
-};
-
-/**
  * GET /services - Display services
  */
 exports.getServices = async (req, res) => {
@@ -336,7 +320,6 @@ module.exports = {
     getDashboard: exports.getDashboard,
     getProfile: exports.getProfile,
     getScoreboard: exports.getScoreboard,
-    getVpn: exports.getVpn,
     getServices: exports.getServices,
     updateProfile: exports.updateProfile
 };

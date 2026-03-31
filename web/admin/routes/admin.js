@@ -27,6 +27,13 @@ router.post('/vpn/generate-teams-testbox', isAuthenticated, adminController.gene
 router.post('/vpn/generate-users', isAuthenticated, adminController.generateVpnUsers);
 router.get('/vpn/test-environment', isAuthenticated, adminController.testVpnEnvironment);
 
+// VPN Download endpoint
+router.get('/download-vpn/:vpnId/:type', isAuthenticated, adminController.downloadVpnConfig);
+
+// Team net generation
+router.post('/team/generate-net/:teamId', isAuthenticated, adminController.generateTeamNet);
+router.post('/team/generate-all-nets', isAuthenticated, adminController.generateAllTeamNets);
+
 // Services Data endpoints
 router.get('/services-data', isAuthenticated, servicesController.getServices);
 router.post('/services-data', isAuthenticated, servicesController.createService);

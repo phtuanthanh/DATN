@@ -254,6 +254,195 @@
             margin-bottom: 1rem;
         }
 
+        /* Table Styles */
+        .vpn-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        .vpn-table thead {
+            background: rgba(0, 212, 255, 0.1);
+            border-bottom: 2px solid #00d4ff;
+        }
+
+        .vpn-table th {
+            padding: 1rem;
+            text-align: left;
+            color: #00d4ff;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .vpn-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            color: #e0e0e0;
+        }
+
+        .vpn-table tbody tr {
+            transition: background 0.3s ease;
+        }
+
+        .vpn-table tbody tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .vpn-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Badge Styles */
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-vulnbox {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .badge-testbox {
+            background: rgba(70, 155, 209, 0.2);
+            color: #469bd1;
+            border: 1px solid rgba(70, 155, 209, 0.3);
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            text-transform: capitalize;
+        }
+
+        .badge-status::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 currentColor;
+                opacity: 1;
+            }
+            70% {
+                box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+                opacity: 0.7;
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+                opacity: 0;
+            }
+        }
+
+        .badge-status:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .badge-status.active,
+        .badge-status.online {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.3) 0%, rgba(193, 233, 214, 0.3) 100%);
+            color: #2ecc71;
+            border: 2px solid #27ae60;
+        }
+
+        .badge-status.active::before,
+        .badge-status.online::before {
+            background-color: #27ae60;
+            box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.2);
+            animation: pulse 1s infinite;
+        }
+
+        .badge-status.offline,
+        .badge-status.inactive {
+            background: linear-gradient(135deg, rgba(189, 195, 199, 0.3) 0%, rgba(179, 185, 191, 0.3) 100%);
+            color: #bdc3c7;
+            border: 2px solid #dc3545;
+        }
+
+        .badge-status.offline::before,
+        .badge-status.inactive::before {
+            background-color: #dc3545;
+            box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.2);
+            animation: pulse 1.5s infinite;
+        }
+
+        .badge-status.pending {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.3) 0%, rgba(255, 232, 161, 0.3) 100%);
+            color: #ffc107;
+            border: 2px solid #ffc107;
+        }
+
+        .badge-status.pending::before {
+            background-color: #ffc107;
+            box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.2);
+            animation: pulse 2.5s infinite;
+        }
+
+        .badge-active {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .badge-inactive {
+            background: rgba(189, 195, 199, 0.2);
+            color: #bdc3c7;
+            border: 1px solid rgba(189, 195, 199, 0.3);
+        }
+
+        /* Button Styles */
+        .btn-download {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+            color: #0a0e27;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-download:hover {
+            background: linear-gradient(135deg, #00e6ff 0%, #00b3ff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-download:active {
+            transform: translateY(0);
+        }
+
+        code {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 0.3rem 0.6rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #00d4ff;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .page-header {
@@ -328,14 +517,170 @@
             </div>
         </div>
 
-        <div class="card">
-            <div class="empty-state">
-                <div class="coming-soon-icon">🔒</div>
-                <p>VPN Status Coming Soon</p>
-                <p style="font-size: 0.9rem; color: #808080;">We're working on bringing you the VPN status management
-                    feature. Stay tuned!</p>
+        <% if (error) { %>
+            <div class="card"
+                style="background: linear-gradient(135deg, #3a1a1a 0%, #1a0f0f 100%); border: 1px solid #5a2a2a;">
+                <div style="color: #ff6b6b; padding: 1rem;">
+                    <strong>⚠️ Notice:</strong>
+                    <%= error %>
+                </div>
             </div>
-        </div>
+            <% } %>
+
+                <% if (!error && vpnTeams && vpnTeams.length===0 && vpnUsers && vpnUsers.length===0) { %>
+                    <div class="card">
+                        <div class="empty-state">
+                            <div class="coming-soon-icon">🔒</div>
+                            <p>No VPN Configurations Available</p>
+                            <p style="font-size: 0.9rem; color: #808080;">Your team doesn't have any VPN configurations
+                                yet.</p>
+                        </div>
+                    </div>
+                    <% } %>
+
+                        <!-- VPN Teams Section -->
+                        <% if (vpnTeams && vpnTeams.length> 0) { %>
+                            <div class="card">
+                                <div class="card-title">
+                                    <span>🏆</span>
+                                    <span>Team VPN Configurations</span>
+                                </div>
+                                <table class="vpn-table">
+                                    <thead>
+                                        <tr>
+                                            <th>VPN Name</th>
+                                            <th>Type</th>
+                                            <th>IP Address</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% vpnTeams.forEach(vpn=> { %>
+                                            <tr>
+                                                <td>
+                                                    <strong>
+                                                        <%= vpn.nameVpn %>
+                                                    </strong>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        class="badge <%= vpn.typeVpn ? 'badge-vulnbox' : 'badge-testbox' %>">
+                                                        <%= vpn.typeVpn ? '🟥 Vulnbox' : '🟦 Testbox' %>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <code><%= vpn.ipVpn || 'N/A' %></code>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        class="badge-status <%= (vpn.statusVpn || '').toLowerCase() %>">
+                                                        <% if ((vpn.statusVpn || '').toLowerCase() === 'active' || (vpn.statusVpn || '').toLowerCase() === 'online') { %>
+                                                            🟢 Online
+                                                        <% } else if ((vpn.statusVpn || '').toLowerCase() === 'offline') { %>
+                                                            🔴 Offline
+                                                        <% } else if ((vpn.statusVpn || '').toLowerCase() === 'pending') { %>
+                                                            🟡 Pending
+                                                        <% } else { %>
+                                                            ⚫ Inactive
+                                                        <% } %>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <% if (vpn.path) { %>
+                                                        <button class="btn-download"
+                                                            onclick="downloadVpnConfig(<%= vpn.id %>, 'team')">
+                                                            📥 Download
+                                                        </button>
+                                                        <% } else { %>
+                                                            <span style="color: #999; font-size: 0.9rem;">Not
+                                                                available</span>
+                                                            <% } %>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <% } %>
+
+                                <!-- VPN Users Section -->
+                                <% if (vpnUsers && vpnUsers.length> 0) { %>
+                                    <div class="card">
+                                        <div class="card-title">
+                                            <span>👥</span>
+                                            <span>Team Member VPN Configurations</span>
+                                        </div>
+                                        <% if (teamMembers && teamMembers.length> 0) { %>
+                                            <p style="color: #999; margin-bottom: 1rem;">Members in your team:
+                                                <strong>
+                                                    <%= teamMembers.map(m=> m.username).join(', ') %>
+                                                </strong>
+                                            </p>
+                                            <% } %>
+                                                <table class="vpn-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Username</th>
+                                                            <th>Email</th>
+                                                            <th>VPN Config</th>
+                                                            <th>IP Address</th>
+                                                            <th>Status</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <% vpnUsers.forEach(vpn=> { %>
+                                                            <tr>
+                                                                <td>
+                                                                    <strong>
+                                                                        <%= (vpn.user && vpn.user.username) ?
+                                                                            vpn.user.username : (vpn.username || 'N/A' )
+                                                                            %>
+                                                                    </strong>
+                                                                </td>
+                                                                <td>
+                                                                    <%= (vpn.user && vpn.user.email) ? vpn.user.email :
+                                                                        (vpn.email || 'N/A' ) %>
+                                                                </td>
+                                                                <td>
+                                                                    <code><%= vpn.nameVpn || 'N/A' %></code>
+                                                                </td>
+                                                                <td>
+                                                                    <code><%= vpn.ipVpn || 'N/A' %></code>
+                                                                </td>
+                                                                <td>
+                                                                    <span
+                                                                        class="badge-status <%= (vpn.statusVpn || '').toLowerCase() %>">
+                                                                        <% if ((vpn.statusVpn || '').toLowerCase() === 'active' || (vpn.statusVpn || '').toLowerCase() === 'online') { %>
+                                                                            🟢 Online
+                                                                        <% } else if ((vpn.statusVpn || '').toLowerCase() === 'offline') { %>
+                                                                            🔴 Offline
+                                                                        <% } else if ((vpn.statusVpn || '').toLowerCase() === 'pending') { %>
+                                                                            🟡 Pending
+                                                                        <% } else { %>
+                                                                            ⚫ Inactive
+                                                                        <% } %>
+                                                                    </span>
+                                                                </td>
+                                                                <td>
+                                                                    <% if (vpn.path) { %>
+                                                                        <button class="btn-download"
+                                                                            onclick="downloadVpnConfig(<%= vpn.id %>, 'user')">
+                                                                            📥 Download
+                                                                        </button>
+                                                                        <% } else { %>
+                                                                            <span
+                                                                                style="color: #999; font-size: 0.9rem;">Not
+                                                                                available</span>
+                                                                            <% } %>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %>
+                                                    </tbody>
+                                                </table>
+                                    </div>
+                                    <% } %>
     </div>
     <script>
         function toggleDropdown() {
@@ -359,6 +704,32 @@
                 document.getElementById('userDropdown').classList.remove('active');
             });
         });
+
+        /**
+         * Download VPN Config File
+         * @param {number} vpnId - VPN configuration ID
+         * @param {string} type - Type of VPN ('team' or 'user')
+         */
+        function downloadVpnConfig(vpnId, type) {
+            if (!vpnId || !type) {
+                alert('Invalid VPN configuration');
+                return;
+            }
+
+            const downloadUrl = `/vpn/download/${vpnId}/${type}`;
+
+            // Create a temporary link element to trigger download
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = '';
+            link.style.display = 'none';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            console.log(`Downloaded VPN config: ${vpnId} (${type})`);
+        }
     </script>
 </body>
 

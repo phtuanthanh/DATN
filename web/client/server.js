@@ -11,6 +11,7 @@ const homeRouter = require('./routes/home');
 const authRouter = require('./routes/auth');
 const userRouter = require('./routes/user');
 const teamRouter = require('./routes/team');
+const vpnRouter = require('./routes/vpn');
 
 // Import Middleware
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
@@ -35,6 +36,7 @@ app.use('/', homeRouter);
 app.use('/auth', authRouter);
 app.use('/', userRouter);
 app.use('/team', teamRouter);
+app.use('/vpn', vpnRouter);
 
 // ===== Error Handlers =====
 app.use(notFoundHandler);

@@ -14,14 +14,18 @@
 
                 <div class="dashboard-section">
                     <% if (teams && teams.length> 0) { %>
+                        <div class="section-controls">
+                            <button class="btn-primary" onclick="generateAllNets()">
+                                Generate All Nets
+                            </button>
+                        </div>
                         <table class="table">
                             <thead>
                                 <tr>
                                     <th>Team ID</th>
                                     <th>Team Name</th>
-                                    <th>Status</th>
                                     <th>Members</th>
-                                    <th>Actions</th>
+                                    <th>Net</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -34,15 +38,13 @@
                                             <%= team.name %>
                                         </td>
                                         <td>
-                                            <span
-                                                class="badge <%= team.status === 'active' ? 'badge-success' : 'badge-warning' %>">
-                                                <%= team.status %>
-                                            </span>
-                                        </td>
-                                        <td>
                                             <%= team.memberCount || 0 %>
                                         </td>
-                                        <td><a href="#">View</a> | <a href="#">Edit</a></td>
+                                        <td>
+                                            <span id="net-<%= team.id %>">
+                                                <%= team.net || '-' %>
+                                            </span>
+                                        </td>
                                     </tr>
                                     <% }); %>
                             </tbody>
@@ -53,7 +55,37 @@
                 </div>
 </div>
 
+<div id="toast-container" class="toast-container"></div>
+
 <style>
+    .section-controls {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+
+    .btn-primary {
+        padding: 8px 16px;
+        background-color: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #229954;
+    }
+
+    .btn-primary:disabled {
+        background-color: #95a5a6;
+        cursor: not-allowed;
+    }
+
     .badge {
         display: inline-block;
         padding: 4px 12px;
@@ -71,4 +103,135 @@
         background: #fef5e7;
         color: #d68910;
     }
+
+    /* Toast Notification Styles */
+    .toast-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toast {
+        padding: 12px 16px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        animation: slideIn 0.3s ease-out;
+        max-width: 350px;
+        word-wrap: break-word;
+    }
+
+    .toast.success {
+        background-color: #d5f4e6;
+        color: #27ae60;
+        border-left: 4px solid #27ae60;
+    }
+
+    .toast.error {
+        background-color: #fadbd8;
+        color: #c0392b;
+        border-left: 4px solid #c0392b;
+    }
+
+    .toast.info {
+        background-color: #d6eaf8;
+        color: #1f618d;
+        border-left: 4px solid #1f618d;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+
+    .toast.removing {
+        animation: slideOut 0.3s ease-out;
+    }
 </style>
+
+<script>
+    function showToast(message, type = 'info', duration = 4000) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+
+        container.appendChild(toast);
+
+        if (duration > 0) {
+            setTimeout(() => {
+                toast.classList.add('removing');
+                setTimeout(() => {
+                    container.removeChild(toast);
+                }, 300);
+            }, duration);
+        }
+    }
+
+    async function generateAllNets() {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.textContent = 'Generating...';
+        showToast('Generating net values for all teams...', 'info');
+
+        try {
+            const response = await fetch('/admin/team/generate-all-nets', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Update net values in table
+                if (data.data && data.data.updated) {
+                    data.data.updated.forEach(item => {
+                        const netCell = document.getElementById(`net-${item.teamId}`);
+                        if (netCell) {
+                            netCell.textContent = item.netValue;
+                        }
+                    });
+                }
+
+                const message = `✓ Generated net values: ${data.data.updated.length} updated, ${data.data.skipped.length} skipped`;
+                showToast(message, 'success', 5000);
+                btn.textContent = 'Generate All Nets';
+            } else {
+                showToast(`✗ Error: ${data.error}`, 'error', 5000);
+                btn.textContent = 'Generate All Nets';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast(`✗ Error: ${error.message}`, 'error', 5000);
+            btn.textContent = 'Generate All Nets';
+        } finally {
+            btn.disabled = false;
+        }
+    }
+</script>

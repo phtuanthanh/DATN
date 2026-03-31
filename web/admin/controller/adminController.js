@@ -255,7 +255,7 @@ exports.getVpnPage = async (req, res) => {
             }).catch(() => []),
             VPNUser.findAll({
                 include: [
-                    { model: User, as: 'user', attributes: ['id', 'username'] },
+                    { model: User, as: 'user', attributes: ['id', 'username', 'email'] },
                     { model: Team, as: 'userTeam', attributes: ['id', 'name'] }
                 ],
                 order: [['idTeam', 'ASC'], ['id', 'ASC']]
@@ -289,13 +289,33 @@ exports.getVpnPage = async (req, res) => {
 // Get team page
 exports.getTeamPage = async (req, res) => {
     try {
-        const { Team } = require('../models');
+        const { Team, User } = require('../models');
 
-        const teams = await Team.findAll().catch(() => []);
+        const teams = await Team.findAll({
+            include: [
+                {
+                    model: User,
+                    as: 'members',
+                    attributes: ['id', 'username']
+                }
+            ]
+        }).catch(err => {
+            console.error('Error fetching teams:', err);
+            return [];
+        });
+
+        // Add member count to each team
+        const teamsWithMembers = teams.map(team => {
+            const teamData = team.toJSON ? team.toJSON() : team;
+            return {
+                ...teamData,
+                memberCount: teamData.members ? teamData.members.length : 0
+            };
+        });
 
         res.render('team-page', {
             username: req.session.username || 'Admin',
-            teams: teams || []
+            teams: teamsWithMembers || []
         });
     } catch (error) {
         console.error('Error rendering team page:', error);
@@ -304,6 +324,156 @@ exports.getTeamPage = async (req, res) => {
             teams: [],
             error: 'Failed to load teams data'
         });
+    }
+};
+
+// Generate net value from VPN config
+exports.generateTeamNet = async (req, res) => {
+    try {
+        const { teamId } = req.params;
+        const { Team, VPNTeam } = require('../models');
+
+        // Find team
+        const team = await Team.findByPk(teamId);
+        if (!team) {
+            return res.status(404).json({ error: 'Team not found' });
+        }
+
+        // Find vulnbox VPN config (typeVpn = true)
+        const vpnConfig = await VPNTeam.findOne({
+            where: {
+                idTeam: teamId,
+                typeVpn: true
+            }
+        });
+
+        if (!vpnConfig || !vpnConfig.ipVpn) {
+            return res.status(400).json({ error: 'No vulnbox VPN config found for this team' });
+        }
+
+        // Extract net host from IP (last octet)
+        // Example: 192.168.199.18 -> 18
+        const ipParts = vpnConfig.ipVpn.split('.');
+        if (ipParts.length !== 4) {
+            return res.status(400).json({ error: 'Invalid IP format' });
+        }
+
+        const netValue = parseInt(ipParts[3]);
+        if (isNaN(netValue)) {
+            return res.status(400).json({ error: 'Invalid IP octets' });
+        }
+
+        // Update team's net column
+        await team.update({ net: netValue });
+
+        console.log(`✓ Updated team ${teamId} net value: ${netValue} (from IP: ${vpnConfig.ipVpn})`);
+
+        res.json({
+            success: true,
+            message: 'Net value generated successfully',
+            data: {
+                teamId: teamId,
+                teamName: team.name,
+                ipVpn: vpnConfig.ipVpn,
+                netValue: netValue
+            }
+        });
+    } catch (error) {
+        console.error('Error generating team net:', error);
+        res.status(500).json({ error: 'Failed to generate net value: ' + error.message });
+    }
+};
+
+// Generate net values for all teams
+exports.generateAllTeamNets = async (req, res) => {
+    try {
+        const { Team, VPNTeam } = require('../models');
+
+        // Get all teams
+        const teams = await Team.findAll();
+        if (!teams || teams.length === 0) {
+            return res.status(400).json({ error: 'No teams found' });
+        }
+
+        const updated = [];
+        const skipped = [];
+
+        // Process each team
+        for (const team of teams) {
+            try {
+                // Find vulnbox VPN config (typeVpn = true)
+                const vpnConfig = await VPNTeam.findOne({
+                    where: {
+                        idTeam: team.id,
+                        typeVpn: true
+                    }
+                });
+
+                if (!vpnConfig || !vpnConfig.ipVpn) {
+                    skipped.push({
+                        teamId: team.id,
+                        teamName: team.name,
+                        reason: 'No vulnbox VPN config'
+                    });
+                    continue;
+                }
+
+                // Extract net host from IP (last octet)
+                const ipParts = vpnConfig.ipVpn.split('.');
+                if (ipParts.length !== 4) {
+                    skipped.push({
+                        teamId: team.id,
+                        teamName: team.name,
+                        reason: 'Invalid IP format'
+                    });
+                    continue;
+                }
+
+                const netValue = parseInt(ipParts[3]);
+                if (isNaN(netValue)) {
+                    skipped.push({
+                        teamId: team.id,
+                        teamName: team.name,
+                        reason: 'Invalid IP octets'
+                    });
+                    continue;
+                }
+
+                // Update team's net column
+                await team.update({ net: netValue });
+
+                updated.push({
+                    teamId: team.id,
+                    teamName: team.name,
+                    ipVpn: vpnConfig.ipVpn,
+                    netValue: netValue,
+                    previousNet: team.net
+                });
+
+                console.log(`✓ Updated team ${team.id} (${team.name}) net value: ${netValue} (from IP: ${vpnConfig.ipVpn})`);
+
+            } catch (error) {
+                console.error(`Error processing team ${team.id}:`, error);
+                skipped.push({
+                    teamId: team.id,
+                    teamName: team.name,
+                    reason: error.message
+                });
+            }
+        }
+
+        res.json({
+            success: true,
+            message: `Generated net values for ${updated.length} teams`,
+            data: {
+                updated,
+                skipped,
+                totalProcessed: teams.length
+            }
+        });
+    } catch (error) {
+        console.error('Error generating all team nets:', error);
+        res.status(500).json({ error: 'Failed to generate net values: ' + error.message });
     }
 };
 
@@ -602,5 +772,122 @@ exports.generateVpnUsers = async (req, res) => {
             message: 'Error generating VPN users',
             error: error.message
         });
+    }
+};
+
+/**
+ * Download VPN config file - SECURE endpoint
+ * @route GET /admin/download-vpn/:vpnId/:type
+ * @security Validates file path to prevent directory traversal attacks
+ */
+exports.downloadVpnConfig = async (req, res) => {
+    const fs = require('fs');
+
+    try {
+        const { vpnId, type } = req.params;
+        const { VPNTeam, VPNUser } = require('../models');
+
+        // Validate parameters
+        if (!vpnId || !type) {
+            return res.status(400).json({ error: 'Invalid vpnId or type' });
+        }
+
+        if (!['team', 'user'].includes(type)) {
+            return res.status(400).json({ error: 'Invalid type. Must be "team" or "user"' });
+        }
+
+        // Fetch VPN record from database
+        let vpnRecord;
+        if (type === 'team') {
+            vpnRecord = await VPNTeam.findByPk(vpnId);
+        } else {
+            vpnRecord = await VPNUser.findByPk(vpnId);
+        }
+
+        // Check if record exists
+        if (!vpnRecord) {
+            return res.status(404).json({ error: 'VPN config not found' });
+        }
+
+        // Check if file path exists
+        if (!vpnRecord.path) {
+            return res.status(404).json({ error: 'No file path configured for this VPN' });
+        }
+
+        // Normalize path from database: convert ./data/vpn-config/ to ./cli/data/vpn-config/
+        let normalizedPath = vpnRecord.path;
+        if (normalizedPath.startsWith('./data/vpn-config/')) {
+            normalizedPath = './cli/data/vpn-config/' + normalizedPath.substring('./data/vpn-config/'.length);
+        }
+
+        // Define allowed base directories
+        const allowedBaseDirs = [
+            path.resolve(__dirname, '../cli/data/vpn-config')
+        ];
+
+        // Resolve and validate the path
+        const filePath = path.resolve(__dirname, '../' + normalizedPath);
+
+        // Security check: Ensure file is within allowed directories (prevent directory traversal)
+        let isAllowed = false;
+        for (const baseDir of allowedBaseDirs) {
+            if (filePath.startsWith(baseDir)) {
+                isAllowed = true;
+                break;
+            }
+        }
+
+        if (!isAllowed) {
+            console.error(`[SECURITY] Denied access to file outside allowed directories: ${filePath}`);
+            return res.status(403).json({ error: 'Access denied - file location not permitted' });
+        }
+
+        // Check if file exists
+        if (!fs.existsSync(filePath)) {
+            console.error(`[VPN-DOWNLOAD] File not found: ${filePath}`);
+            return res.status(404).json({ error: 'VPN config file not found on server' });
+        }
+
+        // Check if path is a file (not directory)
+        const stats = fs.statSync(filePath);
+        if (!stats.isFile()) {
+            console.error(`[VPN-DOWNLOAD] Path is not a file: ${filePath}`);
+            return res.status(400).json({ error: 'Invalid file path' });
+        }
+
+        // Get filename and sanitize it
+        let filename = vpnRecord.nameVpn || path.basename(filePath);
+        // Remove any dangerous characters from filename
+        filename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+        // Ensure .conf extension
+        if (!filename.endsWith('.conf')) {
+            filename += '.conf';
+        }
+
+        // Set response headers for file download
+        res.setHeader('Content-Type', 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`);
+        res.setHeader('Content-Length', stats.size);
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+        // Stream file to client
+        const fileStream = fs.createReadStream(filePath);
+
+        fileStream.on('error', (err) => {
+            console.error(`[VPN-DOWNLOAD] Error reading file: ${filePath}`, err);
+            if (!res.headersSent) {
+                res.status(500).json({ error: 'Error reading file' });
+            }
+        });
+
+        fileStream.pipe(res);
+
+        console.log(`[VPN-DOWNLOAD] Successfully downloaded: ${filename} (${type}, ID: ${vpnId}) from ${filePath}`);
+
+    } catch (error) {
+        console.error('[VPN-DOWNLOAD] Error:', error);
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'Download failed: ' + error.message });
+        }
     }
 };

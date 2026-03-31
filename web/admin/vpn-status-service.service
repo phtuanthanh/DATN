@@ -1,0 +1,35 @@
+[Unit]
+Description=VPN Status Monitoring Service
+Documentation=Start the VPN Status Service to monitor and update VPN connection statuses
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/home/hades/AD/web/admin
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="NODE_ENV=production"
+Environment="VPN_CHECK_INTERVAL=60000"
+Environment="VPN_PING_TIMEOUT=5000"
+Environment="VPN_MAX_RETRIES=3"
+
+# Load environment variables from .env file
+EnvironmentFile=-/home/hades/AD/web/admin/.env
+
+ExecStart=/usr/bin/node cli/vpn-status-service.js
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Process management
+KillMode=process
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=vpn-status-service
+
+[Install]
+WantedBy=multi-user.target

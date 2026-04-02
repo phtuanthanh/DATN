@@ -1,0 +1,6 @@
+git push origin main
+git push backup main
+
+
+git remote set-url --add --push origin https://gitlab.com/yourname/repo.git
+git remote set-url --add --push origin https://github.com/phtuanthanh/DATN.git

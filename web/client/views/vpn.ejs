@@ -314,90 +314,6 @@
             border: 1px solid rgba(70, 155, 209, 0.3);
         }
 
-        .badge-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            white-space: nowrap;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            text-transform: capitalize;
-        }
-
-        .badge-status::before {
-            content: '';
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 currentColor;
-                opacity: 1;
-            }
-            70% {
-                box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
-                opacity: 0.7;
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-                opacity: 0;
-            }
-        }
-
-        .badge-status:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .badge-status.active,
-        .badge-status.online {
-            background: linear-gradient(135deg, rgba(46, 204, 113, 0.3) 0%, rgba(193, 233, 214, 0.3) 100%);
-            color: #2ecc71;
-            border: 2px solid #27ae60;
-        }
-
-        .badge-status.active::before,
-        .badge-status.online::before {
-            background-color: #27ae60;
-            box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.2);
-            animation: pulse 1s infinite;
-        }
-
-        .badge-status.offline,
-        .badge-status.inactive {
-            background: linear-gradient(135deg, rgba(189, 195, 199, 0.3) 0%, rgba(179, 185, 191, 0.3) 100%);
-            color: #bdc3c7;
-            border: 2px solid #dc3545;
-        }
-
-        .badge-status.offline::before,
-        .badge-status.inactive::before {
-            background-color: #dc3545;
-            box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.2);
-            animation: pulse 1.5s infinite;
-        }
-
-        .badge-status.pending {
-            background: linear-gradient(135deg, rgba(255, 193, 7, 0.3) 0%, rgba(255, 232, 161, 0.3) 100%);
-            color: #ffc107;
-            border: 2px solid #ffc107;
-        }
-
-        .badge-status.pending::before {
-            background-color: #ffc107;
-            box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.2);
-            animation: pulse 2.5s infinite;
-        }
-
         .badge-active {
             background: rgba(46, 204, 113, 0.2);
             color: #2ecc71;
@@ -574,16 +490,8 @@
                                                 </td>
                                                 <td>
                                                     <span
-                                                        class="badge-status <%= (vpn.statusVpn || '').toLowerCase() %>">
-                                                        <% if ((vpn.statusVpn || '').toLowerCase() === 'active' || (vpn.statusVpn || '').toLowerCase() === 'online') { %>
-                                                            🟢 Online
-                                                        <% } else if ((vpn.statusVpn || '').toLowerCase() === 'offline') { %>
-                                                            🔴 Offline
-                                                        <% } else if ((vpn.statusVpn || '').toLowerCase() === 'pending') { %>
-                                                            🟡 Pending
-                                                        <% } else { %>
-                                                            ⚫ Inactive
-                                                        <% } %>
+                                                        class="badge <%= (vpn.statusVpn || '').toLowerCase() === 'active' ? 'badge-active' : 'badge-inactive' %>">
+                                                        <%= vpn.statusVpn || 'Unknown' %>
                                                     </span>
                                                 </td>
                                                 <td>
@@ -651,16 +559,8 @@
                                                                 </td>
                                                                 <td>
                                                                     <span
-                                                                        class="badge-status <%= (vpn.statusVpn || '').toLowerCase() %>">
-                                                                        <% if ((vpn.statusVpn || '').toLowerCase() === 'active' || (vpn.statusVpn || '').toLowerCase() === 'online') { %>
-                                                                            🟢 Online
-                                                                        <% } else if ((vpn.statusVpn || '').toLowerCase() === 'offline') { %>
-                                                                            🔴 Offline
-                                                                        <% } else if ((vpn.statusVpn || '').toLowerCase() === 'pending') { %>
-                                                                            🟡 Pending
-                                                                        <% } else { %>
-                                                                            ⚫ Inactive
-                                                                        <% } %>
+                                                                        class="badge <%= (vpn.statusVpn || '').toLowerCase() === 'active' ? 'badge-active' : 'badge-inactive' %>">
+                                                                        <%= vpn.statusVpn || 'Unknown' %>
                                                                     </span>
                                                                 </td>
                                                                 <td>

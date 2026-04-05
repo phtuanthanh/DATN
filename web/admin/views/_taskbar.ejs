@@ -2,28 +2,32 @@
 <div class="dashboard-taskbar">
     <div class="taskbar-tabs">
         <a href="/admin" class="tab-btn <%= currentTab === 'dashboard' ? 'active' : '' %>">
-            <span class="tab-icon">📊</span>
+            <span class="tab-icon dashboard-tab">▦</span>
             Dashboard
         </a>
         <a href="/admin/competition" class="tab-btn <%= currentTab === 'competition' ? 'active' : '' %>">
-            <span class="tab-icon">🏆</span>
+            <span class="tab-icon competition-tab">◆</span>
             Competition
         </a>
         <a href="/admin/services" class="tab-btn <%= currentTab === 'services' ? 'active' : '' %>">
-            <span class="tab-icon">⚙️</span>
+            <span class="tab-icon services-tab">⚙</span>
             Services
         </a>
         <a href="/admin/vpn" class="tab-btn <%= currentTab === 'vpn' ? 'active' : '' %>">
-            <span class="tab-icon">🔐</span>
+            <span class="tab-icon vpn-tab">🔒</span>
             VPN
         </a>
         <a href="/admin/team" class="tab-btn <%= currentTab === 'team' ? 'active' : '' %>">
-            <span class="tab-icon">👥</span>
+            <span class="tab-icon team-tab">♣</span>
             Team
         </a>
         <a href="/admin/test" class="tab-btn <%= currentTab === 'test' ? 'active' : '' %>">
-            <span class="tab-icon">🧪</span>
+            <span class="tab-icon test-tab">≈</span>
             Test
+        </a>
+        <a href="/admin/scoreboard" class="tab-btn <%= currentTab === 'scoreboard' ? 'active' : '' %>">
+            <span class="tab-icon scoreboard-tab">█</span>
+            Scoreboard
         </a>
     </div>
 </div>

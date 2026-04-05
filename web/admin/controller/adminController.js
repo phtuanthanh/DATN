@@ -179,7 +179,7 @@ exports.testVpnEnvironment = async (req, res) => {
 
         // Check Python
         const pythonTest = spawn('python3', ['--version'], {
-            cwd: path.join(__dirname, '../cli')
+            cwd: path.join(__dirname, '../cli/vpn')
         });
 
         let pythonOutput = '';
@@ -199,7 +199,7 @@ exports.testVpnEnvironment = async (req, res) => {
                 envExists,
                 pythonAvailable: code === 0,
                 pythonVersion: pythonOutput || pythonError,
-                cwd: path.join(__dirname, '../cli'),
+                cwd: path.join(__dirname, '../cli/vpn'),
                 timestamp: new Date().toISOString()
             };
             console.log('[VPN-TEST] Result:', result);
@@ -523,57 +523,112 @@ exports.getTestPage = async (req, res) => {
     }
 };
 
-// Get scoreboard data
+exports.getScoreboardPage = async (req, res) => {
+    try {
+        res.render('scoreboard-page', {
+            username: req.session.username || 'Admin'
+        });
+    } catch (error) {
+        console.error('Error rendering scoreboard page:', error);
+        res.render('error', {
+            message: 'Failed to load scoreboard',
+            error: error
+        });
+    }
+};
+
+/**
+ * Get scoreboard API data
+ * @route GET /admin/scoreboard-data
+ */
 exports.getScoreboard = async (req, res) => {
     try {
-        const { ScoringScoreboard, Team } = require('../models');
+        const sequelize = require('../config/database');
 
-        // Fetch all scoreboard entries
-        const scoreboardData = await ScoringScoreboard.findAll({
-            order: [['tick', 'DESC']]
-        }).catch(() => []);
+        // Get current tick from competition
+        const competitionResult = await sequelize.query(`
+            SELECT current_tick
+            FROM competition
+            LIMIT 1
+        `, { type: sequelize.QueryTypes.SELECT });
+
+        const currentTick = competitionResult.length > 0 ? (competitionResult[0].current_tick || 0) : 0;
+
+        // Get all services (not just those with scores)
+        const allServicesResult = await sequelize.query(`
+            SELECT id, name
+            FROM scoring_service
+            ORDER BY name ASC
+        `, { type: sequelize.QueryTypes.SELECT });
+
+        const services = allServicesResult.map(s => s.name);
+
+        // Get all scoreboard data with status
+        const scoreboardData = await sequelize.query(`
+            SELECT 
+                ss.attack,
+                ss.defense,
+                ss.sla,
+                ss.total,
+                ss.service_id,
+                ss.team_id,
+                t.name as team_name,
+                t.images as team_images,
+                t.country as team_country,
+                s.name as service_name
+            FROM scoring_scoreboard ss
+            LEFT JOIN teams t ON ss.team_id = t.id
+            LEFT JOIN scoring_service s ON ss.service_id = s.id
+            ORDER BY ss.team_id ASC, ss.service_id ASC
+        `, { type: sequelize.QueryTypes.SELECT });
 
         if (!scoreboardData || scoreboardData.length === 0) {
             return res.json({
-                teams: []
+                teams: [],
+                services: services,
+                latestTick: currentTick
             });
         }
 
-        // Get latest tick
-        const latestTick = scoreboardData[0].dataValues.tick || 0;
-
-        // Filter data for latest tick only
-        const latestData = scoreboardData.filter(d => d.dataValues.tick === latestTick);
-
         // Group by team
         const teamMap = {};
-        const serviceList = new Set();
 
-        latestData.forEach(row => {
-            const teamName = row.dataValues.team;
-            const serviceName = row.dataValues.service;
+        scoreboardData.forEach(row => {
+            const teamName = row.team_name || `Team ${row.team_id}`;
+            const serviceName = row.service_name || `Service ${row.service_id}`;
 
-            serviceList.add(serviceName);
-
-            if (!teamMap[teamName]) {
-                teamMap[teamName] = {
+            if (!teamMap[row.team_id]) {
+                teamMap[row.team_id] = {
+                    id: row.team_id,
                     name: teamName,
+                    images: row.team_images,
+                    country: row.team_country,
                     services: {},
                     totalAttack: 0,
                     totalDefense: 0,
                     totalSla: 0
                 };
+
+                // Initialize all services with 0 values for each team
+                services.forEach(svc => {
+                    teamMap[row.team_id].services[svc] = {
+                        attack: 0,
+                        defense: 0,
+                        sla: 0
+                    };
+                });
             }
 
-            teamMap[teamName].services[serviceName] = {
-                attack: row.dataValues.attack || 0,
-                defense: row.dataValues.defense || 0,
-                sla: row.dataValues.sla || 0
+            // Update with actual data
+            teamMap[row.team_id].services[serviceName] = {
+                attack: row.attack || 0,
+                defense: row.defense || 0,
+                sla: row.sla || 0
             };
 
-            teamMap[teamName].totalAttack += row.dataValues.attack || 0;
-            teamMap[teamName].totalDefense += row.dataValues.defense || 0;
-            teamMap[teamName].totalSla += row.dataValues.sla || 0;
+            teamMap[row.team_id].totalAttack += row.attack || 0;
+            teamMap[row.team_id].totalDefense += row.defense || 0;
+            teamMap[row.team_id].totalSla += row.sla || 0;
         });
 
         // Convert to array and sort by total score
@@ -582,10 +637,17 @@ exports.getScoreboard = async (req, res) => {
             return team;
         }).sort((a, b) => b.totalScore - a.totalScore);
 
+        console.log('[SCOREBOARD] Services:', services);
+        console.log('[SCOREBOARD] Teams count:', teams.length);
+        console.log('[SCOREBOARD] Current tick:', currentTick);
+        if (teams.length > 0) {
+            console.log('[SCOREBOARD] Team 0 services:', JSON.stringify(teams[0].services));
+        }
+
         res.json({
             teams,
-            services: Array.from(serviceList).sort(),
-            latestTick
+            services,
+            latestTick: currentTick
         });
     } catch (error) {
         console.error('Error fetching scoreboard:', error);
@@ -600,10 +662,10 @@ exports.getScoreboard = async (req, res) => {
  */
 exports.generateVpnTeamsVulnbox = async (req, res) => {
     try {
-        const scriptPath = path.join(__dirname, '../cli/vpn-status-vulnbox.py');
+        const scriptPath = path.join(__dirname, '../cli/vpn/vpn-status-vulnbox.py');
         console.log('[VPN-VULNBOX] Starting VPN vulnbox generation...');
         const python = spawn('python3', [scriptPath], {
-            cwd: path.join(__dirname, '../cli')
+            cwd: path.join(__dirname, '../cli/vpn')
         });
 
         let output = '';
@@ -659,10 +721,10 @@ exports.generateVpnTeamsVulnbox = async (req, res) => {
  */
 exports.generateVpnTeamsTestbox = async (req, res) => {
     try {
-        const scriptPath = path.join(__dirname, '../cli/vpn-status-testbox.py');
+        const scriptPath = path.join(__dirname, '../cli/vpn/vpn-status-testbox.py');
         console.log('[VPN-TESTBOX] Starting VPN testbox generation...');
         const python = spawn('python3', [scriptPath], {
-            cwd: path.join(__dirname, '../cli')
+            cwd: path.join(__dirname, '../cli/vpn')
         });
 
         let output = '';
@@ -718,13 +780,13 @@ exports.generateVpnTeamsTestbox = async (req, res) => {
  */
 exports.generateVpnUsers = async (req, res) => {
     try {
-        const scriptPath = path.join(__dirname, '../cli/vpn-status-user.py');
+        const scriptPath = path.join(__dirname, '../cli/vpn/vpn-status-user.py');
         console.log('[VPN-USER] Starting VPN user generation...');
         console.log('[VPN-USER] Script path:', scriptPath);
-        console.log('[VPN-USER] Working directory:', path.join(__dirname, '../cli'));
+        console.log('[VPN-USER] Working directory:', path.join(__dirname, '../cli/vpn'));
 
         const python = spawn('python3', [scriptPath], {
-            cwd: path.join(__dirname, '../cli')
+            cwd: path.join(__dirname, '../cli/vpn')
         });
 
         let output = '';
@@ -889,5 +951,195 @@ exports.downloadVpnConfig = async (req, res) => {
         if (!res.headersSent) {
             res.status(500).json({ error: 'Download failed: ' + error.message });
         }
+    }
+};
+
+/**
+ * Reset competition data - truncate all scoring tables and reset tick to 0
+ * @route POST /admin/competition-reset
+ */
+exports.resetCompetitionData = async (req, res) => {
+    const sequelize = require('../config/database');
+
+    try {
+        // Only allow POST and check for confirmation
+        if (req.body.confirm !== 'true') {
+            return res.status(400).json({
+                success: false,
+                error: 'Reset confirmation required'
+            });
+        }
+
+        // Execute delete to clear data - IMPORTANT: Delete child tables before parent tables
+        // scoring_capture has foreign key to scoring_flag, so delete it first
+        await sequelize.query(`DELETE FROM scoring_capture`);
+        await sequelize.query(`DELETE FROM scoring_flag`);
+        await sequelize.query(`DELETE FROM scoring_statuscheck`);
+        await sequelize.query(`DELETE FROM scoring_checkerstate`);
+        await sequelize.query(`DELETE FROM scoring_scoreboard`);
+
+        await sequelize.query(`
+            UPDATE scoring_gamecontrol SET current_tick = 0, cancel_checks = false
+        `);
+
+        console.log('[RESET] Competition data reset successfully');
+
+        return res.json({
+            success: true,
+            message: 'Đã xóa dữ liệu cuộc thi! Tick reset về 0.'
+        });
+
+    } catch (error) {
+        console.error('[RESET] Error resetting competition:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'Lỗi khi xử lý dữ liệu'
+        });
+    }
+};
+
+/**
+ * Run Python test script and capture output
+ */
+function runPythonTest(scriptName) {
+    return new Promise((resolve) => {
+        const logs = [];
+        const scriptPath = path.join(__dirname, '../cli/testing', scriptName);
+
+        try {
+            const python = spawn('python3', [scriptPath], {
+                timeout: 30000
+            });
+
+            let stdout = '';
+            let stderr = '';
+
+            python.stdout.on('data', (data) => {
+                stdout += data.toString();
+            });
+
+            python.stderr.on('data', (data) => {
+                stderr += data.toString();
+            });
+
+            python.on('close', (code) => {
+                // Parse JSON logs from stdout (top to bottom)
+                const lines = stdout.trim().split('\n');
+
+                // Iterate through lines from first to last (top to bottom)
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    if (line.trim()) {
+                        try {
+                            const log = JSON.parse(line);
+                            logs.push({
+                                level: log.level || 'info',
+                                message: log.message || line,
+                                timestamp: log.timestamp
+                            });
+                        } catch (e) {
+                            // If not JSON, add as raw text
+                            logs.push({
+                                level: 'info',
+                                message: line
+                            });
+                        }
+                    }
+                }
+
+                if (stderr.trim()) {
+                    logs.push({
+                        level: 'error',
+                        message: stderr.trim()
+                    });
+                }
+
+                // Ensure logs are in chronological order (from first to last)
+                // Don't reverse - keep the order as they were printed
+                resolve(logs);
+            });
+
+            python.on('error', (err) => {
+                logs.push({
+                    level: 'error',
+                    message: `Failed to execute test: ${err.message}`
+                });
+                resolve(logs);
+            });
+        } catch (err) {
+            logs.push({
+                level: 'error',
+                message: `Failed to spawn Python process: ${err.message}`
+            });
+            resolve(logs);
+        }
+    });
+}
+
+/**
+ * Test Wireguard
+ * @route POST /admin/test/wireguard
+ */
+exports.testWireguard = async (req, res) => {
+    try {
+        const logs = await runPythonTest('test_wireguard.py');
+        res.json({ logs });
+    } catch (error) {
+        console.error('Error in testWireguard:', error);
+        res.status(500).json({
+            error: 'Failed to run Wireguard test',
+            logs: [{ level: 'error', message: error.message }]
+        });
+    }
+};
+
+/**
+ * Start services
+ * @route POST /admin/test/start
+ */
+exports.testStart = async (req, res) => {
+    try {
+        const logs = await runPythonTest('start_services.py');
+        res.json({ logs });
+    } catch (error) {
+        console.error('Error in testStart:', error);
+        res.status(500).json({
+            error: 'Failed to start services',
+            logs: [{ level: 'error', message: error.message }]
+        });
+    }
+};
+
+/**
+ * Stop services
+ * @route POST /admin/test/stop
+ */
+exports.testStop = async (req, res) => {
+    try {
+        const logs = await runPythonTest('stop_services.py');
+        res.json({ logs });
+    } catch (error) {
+        console.error('Error in testStop:', error);
+        res.status(500).json({
+            error: 'Failed to stop services',
+            logs: [{ level: 'error', message: error.message }]
+        });
+    }
+};
+
+/**
+ * Test services connectivity
+ * @route POST /admin/test/connectivity
+ */
+exports.testConnectivity = async (req, res) => {
+    try {
+        const logs = await runPythonTest('test_services_connectivity.py');
+        res.json({ logs });
+    } catch (error) {
+        console.error('Error in testConnectivity:', error);
+        res.status(500).json({
+            error: 'Failed to test services connectivity',
+            logs: [{ level: 'error', message: error.message }]
+        });
     }
 };

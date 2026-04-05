@@ -17,8 +17,9 @@ const generateToken = (payload) => {
     });
     return token;
   } catch (error) {
-    console.error('Lỗi khi tạo token:', error);
-    throw error;
+    const errorMsg = `Failed to generate token: ${error.message || 'Unknown error'}`;
+    console.error(errorMsg);
+    return null;
   }
 };
 
@@ -34,8 +35,9 @@ const verifyToken = (token) => {
     });
     return decoded;
   } catch (error) {
-    console.error('Lỗi khi xác minh token:', error.message);
-    throw error;
+    const errorMsg = `Token verification failed: ${error.message || 'Invalid token'}`;
+    console.error(errorMsg);
+    return null;
   }
 };
 

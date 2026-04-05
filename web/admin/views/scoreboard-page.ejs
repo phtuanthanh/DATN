@@ -1,0 +1,482 @@
+<div class="dashboard professional-scoreboard">
+    <%- include('_taskbar', { currentTab: 'scoreboard' }) %>
+
+        <div class="main-content">
+            <style>
+                /* PROFESSIONAL SCOREBOARD THEME */
+                :root {
+                    --primary: #1e40af;
+                    --primary-light: #3b82f6;
+                    --secondary: #7c3aed;
+                    --success: #10b981;
+                    --danger: #ef4444;
+                    --warning: #f59e0b;
+                    --info: #06b6d4;
+
+                    --text-primary: #1f2937;
+                    --text-secondary: #6b7280;
+                    --text-light: #f3f4f6;
+
+                    --bg-light: #f9fafb;
+                    --bg-white: #ffffff;
+                    --border-color: #e5e7eb;
+                    --border-dark: #d1d5db;
+
+                    --font-sans: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+                    --font-mono: 'Monaco', 'Courier New', monospace;
+                }
+
+                .professional-scoreboard {
+                    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+                    color: var(--text-primary);
+                    font-family: var(--font-sans);
+                    min-height: 100vh;
+                    padding: 16px;
+                    padding-top: 80px;
+                    /* FIX 2: Đẩy nội dung xuống dưới để không bị Navbar đè lên */
+                }
+
+                /* =========================================
+               SCOREBOARD TABLE (Fixed Layout)
+               ========================================= */
+                .scoreboard-wrapper {
+                    background: var(--bg-white);
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+                    margin: 0;
+                    overflow-x: auto;
+                    position: relative;
+                }
+
+                .scoreboard-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 15px;
+                    table-layout: auto;
+                    /* Để trình duyệt tự căn chỉnh độ rộng cột */
+                    min-width: 1000px;
+                    margin-top: 80px;
+                }
+
+                .scoreboard-table thead {
+                    background: linear-gradient(180deg, #f3f4f6 0%, #efefef 100%);
+                    border-bottom: 2px solid var(--border-dark);
+                }
+
+                .scoreboard-table th {
+                    padding: 16px 12px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    font-size: 12px;
+                    letter-spacing: 0.5px;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                    vertical-align: middle;
+                }
+
+                .scoreboard-table tbody tr {
+                    border-bottom: 1px solid var(--border-color);
+                    transition: background 0.2s ease;
+                }
+
+                .scoreboard-table tbody tr:hover {
+                    background: #f8f9ff;
+                }
+
+                /* Hiệu ứng Top 3 */
+                .scoreboard-table tbody tr.top-1 {
+                    background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%);
+                    font-weight: 600;
+                }
+
+                .scoreboard-table tbody tr.top-2 {
+                    background: linear-gradient(90deg, #f5f5f5 0%, #efefef 100%);
+                }
+
+                .scoreboard-table tbody tr.top-3 {
+                    background: linear-gradient(90deg, #fef3e2 0%, #fed7aa 100%);
+                }
+
+                .scoreboard-table td {
+                    padding: 12px;
+                    vertical-align: middle;
+                }
+
+                /* RANK CELL */
+                .rank-cell {
+                    font-weight: 700;
+                    text-align: center;
+                    font-size: 18px;
+                    font-family: var(--font-mono);
+                    width: 60px;
+                }
+
+                .rank-1::before {
+                    content: '🥇';
+                    margin-right: 4px;
+                }
+
+                .rank-2::before {
+                    content: '🥈';
+                    margin-right: 4px;
+                }
+
+                .rank-3::before {
+                    content: '🥉';
+                    margin-right: 4px;
+                }
+
+                /* TEAM CELL */
+                .team-cell {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    min-width: 200px;
+                }
+
+                .team-avatar {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 6px;
+                    background: linear-gradient(135deg, var(--primary), var(--secondary));
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: 700;
+                    font-size: 18px;
+                    overflow: hidden;
+                    flex-shrink: 0;
+                    border: 2px solid var(--border-color);
+                }
+
+                .team-avatar img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+
+                .team-info {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .team-name {
+                    font-weight: 600;
+                    color: var(--text-primary);
+                    font-size: 15px;
+                }
+
+                .team-country {
+                    font-size: 12px;
+                    color: var(--text-secondary);
+                }
+
+                /* SERVICE SCORES (The 3 boxes: ATK | DEF | SLA) */
+                .srv-header {
+                    text-align: center !important;
+                }
+
+                .srv-cell {
+                    text-align: center;
+                    min-width: 180px;
+                }
+
+                .srv-scores {
+                    display: inline-grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 4px;
+                    padding: 4px;
+                    background: var(--bg-light);
+                    border-radius: 6px;
+                    border: 1px solid var(--border-color);
+                    width: 100%;
+                    max-width: 180px;
+                }
+
+                .score-val {
+                    padding: 6px 2px;
+                    font-weight: 600;
+                    border-radius: 4px;
+                    font-family: var(--font-mono);
+                    font-size: 13px;
+                    text-align: center;
+                }
+
+                .score-atk {
+                    color: #065f46;
+                    background: #d1fae5;
+                    border: 1px solid #6ee7b7;
+                }
+
+                .score-def {
+                    color: #7c2d12;
+                    background: #fed7aa;
+                    border: 1px solid #fb923c;
+                }
+
+                .score-sla {
+                    color: #0c4a6e;
+                    background: #bae6fd;
+                    border: 1px solid #38bdf8;
+                }
+
+                /* TOTAL SCORES */
+                .total-header {
+                    text-align: center !important;
+                    width: 80px;
+                }
+
+                .total-cell {
+                    text-align: center;
+                    font-weight: 600;
+                    font-family: var(--font-mono);
+                    font-size: 14px;
+                }
+
+                .total-atk {
+                    color: var(--success);
+                }
+
+                .total-def {
+                    color: var(--warning);
+                }
+
+                .total-sla {
+                    color: var(--info);
+                }
+
+                .total-score {
+                    color: var(--primary);
+                    font-size: 16px;
+                    font-weight: 700;
+                    background: #eff6ff;
+                    border-left: 2px solid #bfdbfe;
+                }
+
+                /* LOADING & EMPTY STATES */
+                .loading-state {
+                    padding: 80px 32px;
+                    text-align: center;
+                    color: var(--text-secondary);
+                }
+
+                .loading-spinner {
+                    display: inline-block;
+                    width: 32px;
+                    height: 32px;
+                    border: 3px solid var(--border-color);
+                    border-top-color: var(--primary);
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin-bottom: 16px;
+                }
+
+                @keyframes spin {
+                    to {
+                        transform: rotate(360deg);
+                    }
+                }
+
+                .empty-state {
+                    padding: 60px 32px;
+                    text-align: center;
+                }
+
+                .empty-state-icon {
+                    font-size: 48px;
+                    margin-bottom: 16px;
+                }
+
+                .empty-state-text {
+                    color: var(--text-secondary);
+                    font-size: 16px;
+                }
+
+                /* TICK DISPLAY */
+                .tick-display {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+                    color: white;
+                    padding: 10px 14px;
+                    border-radius: 0;
+                    font-weight: 700;
+                    font-family: var(--font-mono);
+                    font-size: 14px;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                    z-index: 10;
+                }
+
+                .tick-label {
+                    font-size: 12px;
+                    opacity: 0.85;
+                }
+
+                .tick-value {
+                    font-size: 18px;
+                    margin-top: 4px;
+                }
+
+                /* RESPONSIVE */
+                @media (max-width: 1024px) {
+                    .team-cell {
+                        min-width: 150px;
+                    }
+
+                    .srv-cell {
+                        min-width: 150px;
+                    }
+
+                    .score-val {
+                        font-size: 11px;
+                        padding: 4px 2px;
+                    }
+
+                    .total-cell {
+                        font-size: 13px;
+                    }
+                }
+            </style>
+
+            <div id="score-tab">
+                <div class="scoreboard-wrapper">
+                    <div id="tickDisplay" class="tick-display" style="display:none;">
+                        <div class="tick-label">CURRENT TICK</div>
+                        <div class="tick-value" id="tickValue">0</div>
+                    </div>
+
+                    <div id="status-display" class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <div>Loading competition data...</div>
+                    </div>
+
+                    <table id="scoreboardTable" class="scoreboard-table" style="display:none;">
+                        <thead>
+                            <tr id="headerRow"></tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', fetchScoreboard);
+    setInterval(fetchScoreboard, 5000);
+
+    function getTeamAvatar(team) {
+        if (team.images) {
+            try {
+                const images = JSON.parse(team.images);
+                if (Array.isArray(images) && images.length > 0) {
+                    const imagePath = images[0];
+                    if (imagePath.startsWith('http') || imagePath.startsWith('/')) return imagePath;
+                    return `/uploads/teams/${imagePath}`;
+                }
+            } catch (e) {
+                if (team.images.startsWith('http') || team.images.startsWith('/')) return team.images;
+                return `/uploads/teams/${team.images}`;
+            }
+        }
+        return null;
+    }
+
+    function fetchScoreboard() {
+        const table = document.getElementById('scoreboardTable');
+        const tbody = document.getElementById('tableBody');
+        const header = document.getElementById('headerRow');
+        const statusMsg = document.getElementById('status-display');
+        const tickDisplay = document.getElementById('tickDisplay');
+        const tickValue = document.getElementById('tickValue');
+
+        fetch('/admin/scoreboard-data')
+            .then(res => res.json())
+            .then(data => {
+                // Update tick display
+                if (data.latestTick !== undefined && data.latestTick !== null) {
+                    tickValue.textContent = data.latestTick;
+                    tickDisplay.style.display = 'block';
+                }
+
+                if (!data.teams || data.teams.length === 0) {
+                    table.style.display = 'none';
+                    statusMsg.style.display = 'block';
+                    statusMsg.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-text">No teams in competition yet</div></div>';
+                    return;
+                }
+
+                statusMsg.style.display = 'none';
+                table.style.display = 'table';
+
+                // REBUILD HEADER EVERY TIME
+                let hHTML = `
+                    <th style="text-align: center; width: 60px;">Rank</th>
+                    <th style="text-align: left;">Team</th>
+                `;
+
+                data.services.forEach(srv => {
+                    hHTML += `<th class="srv-header">${srv}</th>`;
+                });
+
+                hHTML += `
+                    <th class="total-header">ATK</th>
+                    <th class="total-header">DEF</th>
+                    <th class="total-header">SLA</th>
+                    <th class="total-header">TOTAL</th>
+                `;
+                header.innerHTML = hHTML;
+
+                // BUILD ROWS
+                tbody.innerHTML = data.teams.map((team, idx) => {
+                    const rank = idx + 1;
+                    const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                    const topClass = rank <= 3 ? `top-${rank}` : '';
+                    const avatar = getTeamAvatar(team);
+
+                    const servicesHTML = data.services.map(srv => {
+                        const sData = team.services[srv] || { attack: 0, defense: 0, sla: 0 };
+                        return `
+                            <td class="srv-cell">
+                                <div class="srv-scores" title="Attack | Defense | SLA">
+                                    <div class="score-val score-atk">${sData.attack.toFixed(1)}</div>
+                                    <div class="score-val score-def">${sData.defense.toFixed(1)}</div>
+                                    <div class="score-val score-sla">${sData.sla.toFixed(1)}</div>
+                                </div>
+                            </td>
+                        `;
+                    }).join('');
+
+                    return `
+                        <tr class="${topClass}">
+                            <td class="rank-cell ${rankClass}">${rank}</td>
+                            <td>
+                                <div class="team-cell">
+                                    <div class="team-avatar">
+                                        ${avatar ? `<img src="${avatar}" alt="${team.name}" onerror="this.parentElement.textContent='${team.name.charAt(0).toUpperCase()}'">` : `${team.name.charAt(0).toUpperCase()}`}
+                                    </div>
+                                    <div class="team-info">
+                                        <div class="team-name">${team.name}</div>
+                                        ${team.country ? `<div class="team-country">${team.country}</div>` : ''}
+                                    </div>
+                                </div>
+                            </td>
+                            ${servicesHTML}
+                            <td class="total-cell total-atk">${(team.totalAttack || 0).toFixed(2)}</td>
+                            <td class="total-cell total-def">${(team.totalDefense || 0).toFixed(2)}</td>
+                            <td class="total-cell total-sla">${(team.totalSla || 0).toFixed(2)}</td>
+                            <td class="total-cell total-score">${(team.totalScore || 0).toFixed(2)}</td>
+                        </tr>
+                    `;
+                }).join('');
+            })
+            .catch(err => {
+                table.style.display = 'none';
+                statusMsg.style.display = 'block';
+                statusMsg.innerHTML = `<div style="color: #d32f2f; padding: 40px 20px; text-align: center;">❌ Error: ${err.message}</div>`;
+            });
+    }
+</script>

@@ -29,6 +29,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve team images from client uploads
+app.use('/uploads', express.static(path.join(__dirname, '../client/public/uploads')));
+
 // Session configuration
 app.use(session({
     secret: process.env.SESSION_SECRET || 'admin_secret_key',
@@ -59,12 +62,17 @@ app.use(errorHandler);
 // Initialize database and start server
 const startServer = async () => {
     try {
-        await syncModels();
+        const syncResult = await syncModels();
+        if (syncResult && syncResult.error) {
+            console.error('Database sync failed:', syncResult.error);
+            console.error('Attempting to continue...');
+        }
         app.listen(PORT, HOST, () => {
             console.log(`Admin panel server running at http://${HOST}:${PORT}`);
         });
     } catch (error) {
-        console.error('Failed to start server:', error);
+        const errorMsg = `Failed to start server: ${error.message || 'Unknown error'}`;
+        console.error(errorMsg);
         process.exit(1);
     }
 };

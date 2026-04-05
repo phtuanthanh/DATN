@@ -38,8 +38,9 @@ const syncModels = async () => {
 
         console.log('All owned models synchronized successfully.');
     } catch (error) {
-        console.error('Unable to connect to the database:', error);
-        throw error;
+        const errorMsg = `Database error: ${error.message || 'Unable to connect to the database'}`;
+        console.error(errorMsg);
+        return { success: false, error: errorMsg };
     }
 };
 

@@ -230,8 +230,9 @@ const getCurrentCompetition = async () => {
                 (!competition.end || new Date() <= new Date(competition.end))
         };
     } catch (error) {
-        console.error('Error fetching current competition:', error);
-        throw error;
+        const errorMsg = `Failed to fetch current competition: ${error.message || 'Unknown error'}`;
+        console.error(errorMsg);
+        throw new Error(errorMsg);
     }
 };
 
@@ -268,8 +269,9 @@ const getCompetitionForEdit = async () => {
                 (!competition.end || new Date() <= new Date(competition.end))
         };
     } catch (error) {
-        console.error('Error fetching competition for edit:', error);
-        throw error;
+        const errorMsg = `Failed to fetch competition for edit: ${error.message || 'Unknown error'}`;
+        console.error(errorMsg);
+        throw new Error(errorMsg);
     }
 };
 
@@ -295,17 +297,23 @@ const updateCompetition = async (data) => {
         const endDate = parseDate(data.end);
         const tickDuration = parseInt(data.tick_duration);
 
+        // Convert from Vietnam timezone (UTC+7) to UTC for database
+        const VN_TIMEZONE_OFFSET_MS = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+        const servicesPublicDateUTC = new Date(servicesPublicDate.getTime() - VN_TIMEZONE_OFFSET_MS);
+        const startDateUTC = new Date(startDate.getTime() - VN_TIMEZONE_OFFSET_MS);
+        const endDateUTC = new Date(endDate.getTime() - VN_TIMEZONE_OFFSET_MS);
+
         // Find existing or create new
         let competition = await ScoringGamecontrol.findOne();
 
         const competitionData = {
             competition_name: data.competition_name,
             flag_prefix: data.flag_prefix,
-            services_public: servicesPublicDate,
-            start: startDate,
-            end: endDate,
+            services_public: servicesPublicDateUTC,
+            start: startDateUTC,
+            end: endDateUTC,
             tick_duration: tickDuration,
-            valid_ticks: 0, // Keep as 0, don't auto-calculate
+            valid_ticks: 1, // Keep as 0, don't auto-calculate
             current_tick: 0,
             cancel_checks: data.cancel_checks === true || data.cancel_checks === 'true',
             min_net_number: parseInt(data.min_net_number),

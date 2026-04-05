@@ -46,10 +46,10 @@ func beginTx(db *sql.DB, prohibitChanges bool) (*sql.Tx, error) {
 	return db.BeginTx(context.Background(), opts)
 }
 
-// netNoToTeamID chuyển đổi net_number thành user_id của team.
+// netNoToTeamID chuyển đổi net thành id của team.
 func netNoToTeamID(tx *sql.Tx, teamNetNo int, fakeTeamID *int) (*int, error) {
 	var teamID int
-	err := tx.QueryRow("SELECT user_id FROM registration_team WHERE net_number = $1", teamNetNo).Scan(&teamID)
+	err := tx.QueryRow("SELECT id FROM teams WHERE net = $1", teamNetNo).Scan(&teamID)
 
 	// Ưu tiên fakeTeamID nếu có
 	if fakeTeamID != nil {
@@ -229,12 +229,12 @@ func GetNewTasks(db *sql.DB, serviceID int, taskCount int, prohibitChanges bool)
 	}
 
 	query := `
-		SELECT flag.id, flag.protecting_team_id, flag.tick, team.net_number
-		FROM scoring_flag flag, scoring_gamecontrol control, registration_team team
+		SELECT flag.id, flag.protecting_team_id, flag.tick, team.net
+		FROM scoring_flag flag, scoring_gamecontrol control, teams team
 		WHERE flag.placement_start IS NULL
 		  AND flag.tick = control.current_tick
 		  AND flag.service_id = $1
-		  AND flag.protecting_team_id = team.user_id
+		  AND flag.protecting_team_id = team.id
 		ORDER BY RANDOM()
 		LIMIT $2`
 
@@ -387,11 +387,11 @@ func LoadState(db *sql.DB, serviceID int, teamNetNo int, key string, prohibitCha
 
 	var data string
 	query := `
-		SELECT data FROM scoring_checkerstate state, registration_team team
+		SELECT data FROM scoring_checkerstate state, teams team
 		WHERE state.service_id = $1
 		  AND state.key = $2
-		  AND team.net_number = $3
-		  AND state.team_id = team.user_id`
+		  AND team.net = $3
+		  AND state.team_id = team.id`
 
 	err = tx.QueryRow(query, serviceID, key, teamNetNo).Scan(&data)
 	if err != nil {

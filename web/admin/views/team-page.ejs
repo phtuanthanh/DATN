@@ -1,9 +1,15 @@
 <div class="dashboard">
     <%- include('_taskbar', { currentTab: 'team' }) %>
 
-        <div class="section-header">
-            <h2>Teams Management</h2>
-            <p class="section-subtitle">View and manage competition teams</p>
+        <div class="section-header enhanced">
+            <div class="header-content">
+                <div class="header-icon pro-icon team-icon">TMN</div>
+                <div class="header-text">
+                    <h2>Teams Management</h2>
+                    <p class="section-subtitle">View and manage competition teams</p>
+                </div>
+            </div>
+            <div class="header-divider"></div>
         </div>
 
         <% if (typeof error !=='undefined' && error) { %>

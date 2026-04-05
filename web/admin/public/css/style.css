@@ -79,17 +79,30 @@ body {
 }
 
 .top-bar {
-    background: white;
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
     padding: 20px 30px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
+.top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.brand-icon {
+    font-size: 28px;
+    display: inline-block;
+}
+
 .top-bar h1 {
     font-size: 24px;
-    color: #2c3e50;
+    color: white;
+    margin: 0;
+    font-weight: 600;
 }
 
 .top-bar-right {
@@ -99,21 +112,31 @@ body {
 }
 
 .user-info {
-    color: #7f8c8d;
+    color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.user-icon {
+    font-size: 18px;
 }
 
 .logout-btn {
-    background: #e74c3c;
+    background: rgba(255, 255, 255, 0.2);
     color: white;
     padding: 8px 16px;
     border-radius: 5px;
     text-decoration: none;
     font-weight: 600;
-    transition: background 0.3s;
+    transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .logout-btn:hover {
-    background: #c0392b;
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .content {
@@ -267,6 +290,34 @@ body {
     font-size: 16px;
 }
 
+.tab-icon.dashboard-tab {
+    color: #0369a1;
+}
+
+.tab-icon.competition-tab {
+    color: #be123c;
+}
+
+.tab-icon.services-tab {
+    color: #7c3aed;
+}
+
+.tab-icon.vpn-tab {
+    color: #059669;
+}
+
+.tab-icon.team-tab {
+    color: #d97706;
+}
+
+.tab-icon.test-tab {
+    color: #06b6d4;
+}
+
+.tab-icon.scoreboard-tab {
+    color: #1e40af;
+}
+
 /* ===== TAB CONTENT STYLES ===== */
 
 .tab-content {
@@ -294,15 +345,112 @@ body {
     margin-bottom: 25px;
 }
 
+.section-header.enhanced {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    padding: 24px 30px;
+    border-radius: 8px;
+    border-left: 4px solid #1e40af;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 0 30px;
+}
+
+.header-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.header-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.header-divider {
+    height: 3px;
+    background: linear-gradient(90deg, #1e40af 0%, transparent 100%);
+    margin-top: 16px;
+    border-radius: 2px;
+    grid-column: 1 / -1;
+    grid-row: 2;
+}
+
+.header-icon {
+    font-size: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    border-radius: 8px;
+    color: white;
+}
+
+.header-icon.pro-icon {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+}
+
+.header-icon.dashboard-icon {
+    background: linear-gradient(135deg, #0369a1 0%, #0c4a6e 100%);
+}
+
+.header-icon.competition-icon {
+    background: linear-gradient(135deg, #be123c 0%, #881337 100%);
+}
+
+.header-icon.services-icon {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+.header-icon.vpn-icon {
+    background: linear-gradient(135deg, #059669 0%, #065f46 100%);
+}
+
+.header-icon.team-icon {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+.header-icon.user-icon {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.header-icon.test-icon {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+}
+
+.header-text {
+    flex: 1;
+}
+
 .section-header h2 {
     color: #2c3e50;
     font-size: 24px;
     margin-bottom: 8px;
+    font-weight: 600;
 }
 
 .section-subtitle {
     color: #95a5a6;
     font-size: 14px;
+}
+
+.header-divider {
+    height: 3px;
+    background: linear-gradient(90deg, #1e40af 0%, transparent 100%);
+    margin-top: 16px;
+    border-radius: 2px;
 }
 
 /* ===== COMPETITION SECTION STYLES ===== */

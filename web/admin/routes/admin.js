@@ -14,10 +14,12 @@ router.get('/vpn', isAuthenticated, adminController.getVpnPage);
 router.get('/team', isAuthenticated, adminController.getTeamPage);
 router.get('/user', isAuthenticated, adminController.getUserPage);
 router.get('/test', isAuthenticated, adminController.getTestPage);
+router.get('/scoreboard', isAuthenticated, adminController.getScoreboardPage);
 
 // Competition Data endpoints
 router.get('/competition-data', isAuthenticated, adminController.getCompetition);
 router.post('/competition-data', isAuthenticated, adminController.updateCompetition);
+router.post('/competition-reset', isAuthenticated, adminController.resetCompetitionData);
 router.get('/stats-data', isAuthenticated, adminController.getDashboardStats);
 router.get('/scoreboard-data', isAuthenticated, adminController.getScoreboard);
 
@@ -39,5 +41,9 @@ router.get('/services-data', isAuthenticated, servicesController.getServices);
 router.post('/services-data', isAuthenticated, servicesController.createService);
 router.put('/services-data/:id', isAuthenticated, servicesController.updateService);
 router.delete('/services-data/:id', isAuthenticated, servicesController.deleteService);
+
+// Test endpoints
+router.post('/test/wireguard', isAuthenticated, adminController.testWireguard);
+router.post('/test/connectivity', isAuthenticated, adminController.testConnectivity);
 
 module.exports = router;

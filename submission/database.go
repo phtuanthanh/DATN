@@ -50,17 +50,9 @@ func GetDynamicInfo(db *sql.DB) (start, end time.Time, err error) {
 	return startNull.Time.UTC(), endNull.Time.UTC(), nil
 }
 
+// TeamIsNOP is no longer used - nop_team functionality removed
 func TeamIsNOP(db *sql.DB, netNumber int) (bool, error) {
-	var isNOP bool
-	err := db.QueryRow(`SELECT nop_team FROM registration_team WHERE net_number = $1`, netNumber).Scan(&isNOP)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return false, nil
-		}
-		return false, err
-	}
-
-	return isNOP, nil
+	return false, nil
 }
 
 func AddCapture(db *sql.DB, flagID uint32, capturingTeamNetNo int) error {
@@ -71,7 +63,7 @@ func AddCapture(db *sql.DB, flagID uint32, capturingTeamNetNo int) error {
 	defer tx.Rollback()
 
 	var teamID int
-	err = tx.QueryRow(`SELECT user_id FROM registration_team WHERE net_number = $1`, capturingTeamNetNo).Scan(&teamID)
+	err = tx.QueryRow(`SELECT id FROM teams WHERE net = $1`, capturingTeamNetNo).Scan(&teamID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrTeamNotExisting

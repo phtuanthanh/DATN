@@ -45,12 +45,17 @@ app.use(errorHandler);
 // ===== Start Server =====
 const startServer = async () => {
     try {
-        await syncModels();
+        const syncResult = await syncModels();
+        if (syncResult && syncResult.error) {
+            console.error('Database sync failed:', syncResult.error);
+            console.error('Attempting to continue...');
+        }
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });
     } catch (error) {
-        console.error('Failed to start server:', error);
+        const errorMsg = `Failed to start server: ${error.message || 'Unknown error'}`;
+        console.error(errorMsg);
         process.exit(1);
     }
 };

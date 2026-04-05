@@ -108,7 +108,9 @@ func main() {
 
 func mainLoopStep(ctx context.Context, dbConn *sql.DB, m *Metrics, scoringLock *sync.Mutex, nonstop bool) {
 	sleep := func(d time.Duration) {
-		log.Printf("Sleeping for %v", d)
+		if d > 0 {
+			log.Printf("Sleeping for %v", d)
+		}
 		time.Sleep(d)
 	}
 
@@ -154,7 +156,7 @@ func mainLoopStep(ctx context.Context, dbConn *sql.DB, m *Metrics, scoringLock *
 		return
 	}
 
-	if !nonstop && now.After(controlInfo.End) || now.Equal(controlInfo.End) {
+	if !nonstop && (now.After(controlInfo.End) || now.Equal(controlInfo.End)) {
 		CancelChecks(ctx, dbConn)
 		CalculateScoreboard(ctx, dbConn) // Update lần cuối
 
@@ -164,6 +166,20 @@ func mainLoopStep(ctx context.Context, dbConn *sql.DB, m *Metrics, scoringLock *
 	}
 
 	if getSleepSeconds(controlInfo, m, now) <= 0 {
+		// Check if the next tick would go beyond competition end time
+		nextTickStartOffset := time.Duration((controlInfo.CurrentTick+1)*controlInfo.TickDuration) * time.Second
+		nextTickStart := controlInfo.Start.Add(nextTickStartOffset)
+
+		// If next tick start is after or at end time, don't increase tick when not in nonstop mode
+		if !nonstop && (nextTickStart.After(controlInfo.End) || nextTickStart.Equal(controlInfo.End)) {
+			log.Printf("Next tick would start at %v, which is at or after competition end time %v. Not increasing tick.", nextTickStart, controlInfo.End)
+			CancelChecks(ctx, dbConn)
+			CalculateScoreboard(ctx, dbConn) // Final update
+			log.Println("Competition is already over")
+			sleep(60 * time.Second)
+			return
+		}
+
 		log.Printf("After tick %d, increasing tick to the next one", controlInfo.CurrentTick)
 
 		tx, err := dbConn.BeginTx(ctx, nil)

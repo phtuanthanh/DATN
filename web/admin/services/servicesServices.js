@@ -55,8 +55,9 @@ const getAllServices = async () => {
         });
         return services;
     } catch (error) {
-        console.error('Error fetching services:', error);
-        throw error;
+        const errorMsg = `Failed to fetch services: ${error.message || 'Unknown error'}`;
+        console.error(errorMsg);
+        throw new Error(errorMsg);
     }
 };
 
@@ -70,8 +71,9 @@ const getServiceById = async (id) => {
         const service = await ScoringService.findByPk(id);
         return service || null;
     } catch (error) {
-        console.error('Error fetching service:', error);
-        throw error;
+        const errorMsg = `Failed to fetch service by ID: ${error.message || 'Unknown error'}`;
+        console.error(errorMsg);
+        throw new Error(errorMsg);
     }
 };
 
@@ -214,9 +216,24 @@ const deleteService = async (id) => {
         };
     } catch (error) {
         console.error('Error deleting service:', error);
+
+        // Parse error message - extract meaningful text only
+        let errorMsg = 'Failed to delete service';
+        if (error.message) {
+            if (error.message.includes('foreign key constraint')) {
+                errorMsg = 'Cannot delete service: it has existing dependencies or is being used';
+            } else if (error.message.includes('violates')) {
+                errorMsg = 'Cannot delete service: operation violates database constraints';
+            } else {
+                // Extract just the core error text, not full stack
+                const match = error.message.match(/^([^:]+)/);
+                errorMsg = match ? `Failed to delete service: ${match[0]}` : 'Failed to delete service';
+            }
+        }
+
         return {
             success: false,
-            errors: ['Failed to delete service: ' + error.message]
+            errors: [errorMsg]
         };
     }
 };

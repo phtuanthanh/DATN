@@ -65,8 +65,7 @@ func IncreaseTick(ctx context.Context, db DBTX) error {
 	insertQuery := `
 		INSERT INTO scoring_flag (service_id, protecting_team_id, tick)
 		SELECT service.id, team.user_id, control.current_tick
-		FROM scoring_service service, auth_user, registration_team team, scoring_gamecontrol control
-		WHERE auth_user.id = team.user_id AND auth_user.is_active = true
+		FROM scoring_service service, registration_team team, scoring_gamecontrol control
 	`
 	if _, err := db.ExecContext(ctx, insertQuery); err != nil {
 		return fmt.Errorf("failed to insert new flags: %w", err)

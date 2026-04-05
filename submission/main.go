@@ -326,13 +326,16 @@ func handleTeamConnection(conn net.Conn, dbConn *sql.DB, params runtimeParams, c
 	logWithClient("INFO", "Accepted connection from %s (team net number %d)", clientAddr, clientNetNo)
 
 	intro := ("\n" +
-		"╔" + strings.Repeat("═", 40) + "╗\n" +
-		"║" + centerText(params.competitionName, 40) + "║\n" +
-		"╠" + strings.Repeat("═", 40) + "╣\n" +
-		"║" + centerText("Server Submission Flag", 40) + "║\n" +
-		"╠" + strings.Repeat("═", 40) + "╣\n" +
-		"║" + centerText("One flag per line please!", 40) + "║\n" +
-		"╚" + strings.Repeat("═", 40) + "╝\n\n")
+		"  ┌─────────────────────────────────────────────────────┐\n" +
+		"  │  AD - FLAG SUBMISSION                               │\n" +
+		"  ├─────────────────────────────────────────────────────┤\n" +
+		"  │  [*] Capture The Flag Scoring Platform              │\n" +
+		"  ├─────────────────────────────────────────────────────┤\n" +
+		"  │  • Submit one valid flag per line                   │\n" +
+		"  │  • UTF-8 encoding required                          │\n" +
+		"  │  • Read timeout: 5 minutes                          │\n" +
+		"  │  • Connection auto-closes on timeout                │\n" +
+		"  └─────────────────────────────────────────────────────┘\n\n")
 	if _, err := conn.Write([]byte(intro)); err != nil {
 		return err
 	}

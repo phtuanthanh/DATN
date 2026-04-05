@@ -1,9 +1,15 @@
 <div class="dashboard">
     <%- include('_taskbar', { currentTab: 'user' }) %>
 
-        <div class="section-header">
-            <h2>Users Management</h2>
-            <p class="section-subtitle">View and manage system users</p>
+        <div class="section-header enhanced">
+            <div class="header-content">
+                <div class="header-icon pro-icon user-icon">USR</div>
+                <div class="header-text">
+                    <h2>Users Management</h2>
+                    <p class="section-subtitle">View and manage system users</p>
+                </div>
+            </div>
+            <div class="header-divider"></div>
         </div>
 
         <% if (typeof error !=='undefined' && error) { %>

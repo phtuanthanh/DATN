@@ -23,12 +23,6 @@ func CalculateScoreboard(ctx context.Context, db DBTX) error {
 	// Đếm số lần một flag bị capture: map[flagID]count
 	flagCaptureCounts := make(map[int]float64)
 
-	// Lấy danh sách NOP teams
-	nopTeamIDs, err := getNOPTeamIDs(ctx, db)
-	if err != nil {
-		return fmt.Errorf("failed to get NOP teams: %w", err)
-	}
-
 	// Lấy dữ liệu Captures
 	type capture struct {
 		serviceID        int
@@ -51,18 +45,9 @@ func CalculateScoreboard(ctx context.Context, db DBTX) error {
 		if err := rowsCap.Scan(&c.serviceID, &c.capturingTeamID, &c.protectingTeamID, &c.flagID); err != nil {
 			return err
 		}
-		if !nopTeamIDs[c.capturingTeamID] {
-			captures = append(captures, c)
-		}
+		captures = append(captures, c)
 	}
 
-	// Lấy dữ liệu Flags
-	type flagData struct {
-		id               int
-		serviceID        int
-		protectingTeamID int
-	}
-	var flags []flagData
 	serviceIDs := make(map[int]bool)
 	teamIDs := make(map[int]bool)
 
@@ -72,16 +57,21 @@ func CalculateScoreboard(ctx context.Context, db DBTX) error {
 	}
 	defer rowsFlag.Close()
 
+	type flagData struct {
+		id               int
+		serviceID        int
+		protectingTeamID int
+	}
+	var flags []flagData
+
 	for rowsFlag.Next() {
 		var f flagData
 		if err := rowsFlag.Scan(&f.id, &f.serviceID, &f.protectingTeamID); err != nil {
 			return err
 		}
-		if !nopTeamIDs[f.protectingTeamID] {
-			flags = append(flags, f)
-			serviceIDs[f.serviceID] = true
-			teamIDs[f.protectingTeamID] = true
-		}
+		flags = append(flags, f)
+		serviceIDs[f.serviceID] = true
+		teamIDs[f.protectingTeamID] = true
 	}
 
 	// Khởi tạo trước các giá trị (Pre-fill dicts)
@@ -115,8 +105,7 @@ func CalculateScoreboard(ctx context.Context, db DBTX) error {
 	// Tính điểm SLA
 	var teamCount int
 	err = db.QueryRowContext(ctx, `
-		SELECT COUNT(*) FROM registration_team t JOIN auth_user u ON t.user_id = u.id 
-		WHERE u.is_active = true AND t.nop_team = false
+		SELECT COUNT(*) FROM registration_team
 	`).Scan(&teamCount)
 	if err != nil {
 		return err
@@ -141,9 +130,7 @@ func CalculateScoreboard(ctx context.Context, db DBTX) error {
 			if err := rows.Scan(&tID, &sID, &tickCount); err != nil {
 				return err
 			}
-			if !nopTeamIDs[tID] {
-				teamSLA[tID][sID] += float64(tickCount) * multiplier
-			}
+			teamSLA[tID][sID] += float64(tickCount) * multiplier
 		}
 		return nil
 	}
@@ -188,25 +175,6 @@ func CalculateScoreboard(ctx context.Context, db DBTX) error {
 	}
 
 	return nil
-}
-
-// getNOPTeamIDs trả về một map (dùng như set) chứa các ID của NOP teams
-func getNOPTeamIDs(ctx context.Context, db DBTX) (map[int]bool, error) {
-	rows, err := db.QueryContext(ctx, `SELECT user_id FROM registration_team WHERE nop_team = true`)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	nops := make(map[int]bool)
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		nops[id] = true
-	}
-	return nops, nil
 }
 
 // bulkInsertScoreboard thực thi insert nhiều dòng cùng lúc.

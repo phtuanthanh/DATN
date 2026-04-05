@@ -5,450 +5,480 @@
         <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; max-width: 400px;">
         </div>
 
-        <div class="section-header">
-            <h2>VPN Configuration</h2>
-            <p class="section-subtitle">Manage VPN settings for teams and users</p>
-        </div>
-
-        <!-- VPN Generation Controls -->
-        <div class="dashboard-section">
-            <h3>Generate VPN Configurations</h3>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
-                <button class="btn btn-primary" onclick="generateVpnTeamsVulnbox()">
-                    Generate Teams VPN (Vulnbox)
-                </button>
-                <button class="btn btn-primary" onclick="generateVpnTeamsTestbox()">
-                    Generate Teams VPN (Testbox)
-                </button>
-                <button class="btn btn-primary" onclick="generateVpnUsers()">
-                    Generate Users VPN
-                </button>
-                <button class="btn btn-secondary" onclick="testEnvironment()" style="background: #95a5a6;">
-                    🔧 Test Environment
-                </button>
-            </div>
-
-            <!-- Output Display -->
-            <div id="vpn-output"
-                style="display: none; background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <strong>Generation Output:</strong>
-                    <button class="btn btn-small" onclick="clearVpnOutput()">Clear</button>
+        <div class="section-header enhanced">
+            <div class="header-content">
+                <div class="header-icon pro-icon vpn-icon">VPN</div>
+                <div class="header-text">
+                    <h2>VPN Configuration</h2>
+                    <p class="section-subtitle">Manage VPN settings for teams and users</p>
                 </div>
-                <pre id="vpn-output-text" style="margin: 0; white-space: pre-wrap; word-break: break-word;"></pre>
             </div>
+            <div class="header-divider"></div>
         </div>
+</div>
 
-        <!-- VPN Teams -->
-        <div class="dashboard-section">
-            <h3>VPN Teams</h3>
-            <% if (vpnTeams && vpnTeams.length> 0) { %>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Team Name</th>
-                            <th>Type</th>
-                            <th>VPN Config</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% Object.values(groupedVpnTeams).forEach((teamGroup, idx)=> { %>
-                            <% const teamName=(teamGroup[0].team && teamGroup[0].team.name) ? teamGroup[0].team.name :
-                                (teamGroup[0].nameVpn || 'N/A' ); %>
-                                <% const rowColor=idx % 2===0 ? '#f9f9f9' : '#f0f7ff' ; %>
+<!-- VPN Generation Controls -->
+<div class="dashboard-section">
+    <h3>Generate VPN Configurations</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+        <button class="btn btn-primary" onclick="generateVpnTeamsVulnbox()">
+            Generate Teams VPN (Vulnbox)
+        </button>
+        <button class="btn btn-primary" onclick="generateVpnTeamsTestbox()">
+            Generate Teams VPN (Testbox)
+        </button>
+        <button class="btn btn-primary" onclick="generateVpnUsers()">
+            Generate Users VPN
+        </button>
+        <button class="btn btn-secondary" onclick="testEnvironment()" style="background: #95a5a6;">
+            🔧 Test Environment
+        </button>
+    </div>
 
-                                    <!-- Team Group Header -->
-                                    <tr class="team-header"
-                                        style="background-color: <%= idx % 2 === 0 ? '#e8f4f8' : '#f0f4ff' %>; border-top: 3px solid #3498db;">
-                                        <td colspan="5"
-                                            style="padding: 12px; font-weight: 700; font-size: 14px; color: #2c3e50;">
-                                            🏆 Team: <span style="color: #3498db;">
-                                                <%= teamName %>
-                                            </span> (ID: <%= teamGroup[0].idTeam %>)
-                                        </td>
-                                    </tr>
+    <!-- Output Display -->
+    <div id="vpn-output"
+        style="display: none; background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong>Generation Output:</strong>
+            <button class="btn btn-small" onclick="clearVpnOutput()">Clear</button>
+        </div>
+        <pre id="vpn-output-text" style="margin: 0; white-space: pre-wrap; word-break: break-word;"></pre>
+    </div>
+</div>
 
-                                    <% teamGroup.forEach((team, itemIdx)=> { %>
-                                        <tr
-                                            style="background-color: <%= rowColor %>; border-left: 3px solid <%= itemIdx === 0 ? '#3498db' : 'transparent' %>;">
-                                            <td style="font-weight: 600; padding: 12px 12px 12px 18px;">
-                                                <%= teamGroup[0].idTeam %>
-                                            </td>
-                                            <td style="font-weight: 500;">
-                                                <%= teamName %>
-                                            </td>
-                                            <td>
-                                                <span class="badge-type <%= team.typeVpn ? 'vuln' : 'test' %>">
-                                                    <%= team.typeVpn ? '🟥 Vulnbox' : '🟦 Testbox' %>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <% if (team.path) { %>
-                                                    <button class="btn-download"
-                                                        onclick="downloadVpnConfig(<%= team.id %>, 'team')"
-                                                        title="Download VPN Config">📥 Download</button>
-                                                    <% } else { %>
-                                                        <span style="color: #bdc3c7;">Not generated</span>
-                                                        <% } %>
-                                            </td>
-                                            <td>
-                                                <% const status=team.statusVpn || 'Inactive' ; %>
-                                                    <span class="badge-status <%= status.toLowerCase() %>">
-                                                        <% if (status.toLowerCase() === 'active' || status.toLowerCase() === 'online') { %>
-                                                            🟢 Online
-                                                        <% } else if (status.toLowerCase() === 'offline') { %>
-                                                            🔴 Offline
-                                                        <% } else if (status.toLowerCase() === 'pending') { %>
+<!-- VPN Teams -->
+<div class="dashboard-section">
+    <h3>VPN Teams</h3>
+    <% if (vpnTeams && vpnTeams.length> 0) { %>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Team Name</th>
+                    <th>Type</th>
+                    <th>IP</th>
+                    <th>VPN Config</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% Object.values(groupedVpnTeams).forEach((teamGroup, idx)=> { %>
+                    <% const teamName=(teamGroup[0].team && teamGroup[0].team.name) ? teamGroup[0].team.name :
+                        (teamGroup[0].nameVpn || 'N/A' ); %>
+                        <% const rowColor=idx % 2===0 ? '#f9f9f9' : '#f0f7ff' ; %>
+
+                            <!-- Team Group Header -->
+                            <tr class="team-header"
+                                style="background-color: <%= idx % 2 === 0 ? '#e8f4f8' : '#f0f4ff' %>; border-top: 3px solid #3498db;">
+                                <td colspan="6"
+                                    style="padding: 12px; font-weight: 700; font-size: 14px; color: #2c3e50;">
+                                    🏆 Team: <span style="color: #3498db;">
+                                        <%= teamName %>
+                                    </span> (ID: <%= teamGroup[0].idTeam %>)
+                                </td>
+                            </tr>
+
+                            <% teamGroup.forEach((team, itemIdx)=> { %>
+                                <tr
+                                    style="background-color: <%= rowColor %>; border-left: 3px solid <%= itemIdx === 0 ? '#3498db' : 'transparent' %>;">
+                                    <td style="font-weight: 600; padding: 12px 12px 12px 18px;">
+                                        <%= teamGroup[0].idTeam %>
+                                    </td>
+                                    <td style="font-weight: 500;">
+                                        <%= teamName %>
+                                    </td>
+                                    <td>
+                                        <span class="badge-type <%= team.typeVpn ? 'vuln' : 'test' %>">
+                                            <%= team.typeVpn ? '🟥 Vulnbox' : '🟦 Testbox' %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <% if (team.ipVpn) { %>
+                                            <span style="font-family: monospace; font-weight: 500;">
+                                                <%= team.ipVpn %>
+                                            </span>
+                                            <% } else { %>
+                                                <span style="color: #bdc3c7;">N/A</span>
+                                                <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (team.path) { %>
+                                            <button class="btn-download"
+                                                onclick="downloadVpnConfig(<%= team.id %>, 'team')"
+                                                title="Download VPN Config">📥 Download</button>
+                                            <% } else { %>
+                                                <span style="color: #bdc3c7;">Not generated</span>
+                                                <% } %>
+                                    </td>
+                                    <td>
+                                        <% const status=team.statusVpn || 'Inactive' ; %>
+                                            <span class="badge-status <%= status.toLowerCase() %>">
+                                                <% if (status.toLowerCase()==='active' ||
+                                                    status.toLowerCase()==='online' ) { %>
+                                                    🟢 Online
+                                                    <% } else if (status.toLowerCase()==='offline' ) { %>
+                                                        🔴 Offline
+                                                        <% } else if (status.toLowerCase()==='pending' ) { %>
                                                             🟡 Pending
-                                                        <% } else { %>
-                                                            ⚫ Inactive
-                                                        <% } %>
-                                                    </span>
-                                            </td>
-                                        </tr>
-                                        </tr>
-                                        <% }) %>
-                                            <% }) %>
-                    </tbody>
-                </table>
-                <% } else { %>
-                    <p>No VPN teams configured yet.</p>
-                    <% } %>
-        </div>
+                                                            <% } else { %>
+                                                                ⚫ Inactive
+                                                                <% } %>
+                                            </span>
+                                    </td>
+                                </tr>
+                                </tr>
+                                <% }) %>
+                                    <% }) %>
+            </tbody>
+        </table>
+        <% } else { %>
+            <p>No VPN teams configured yet.</p>
+            <% } %>
+</div>
 
-        <!-- VPN Users -->
-        <div class="dashboard-section">
-            <h3>VPN Users</h3>
-            <% if (vpnUsers && vpnUsers.length> 0) { %>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>VPN Config</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% let prevTeamId=null; %>
-                            <% let teamIndex=0; %>
-                                <% vpnUsers.forEach((user, idx)=> { %>
-                                    <% const teamId=user.idTeam || 'no-team' ; %>
-                                        <% const teamName=(user.userTeam && user.userTeam.name) ? user.userTeam.name
-                                            : 'No Team' ; %>
+<!-- VPN Users -->
+<div class="dashboard-section">
+    <h3>VPN Users</h3>
+    <% if (vpnUsers && vpnUsers.length> 0) { %>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>IP</th>
+                    <th>VPN Config</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% let prevTeamId=null; %>
+                    <% let teamIndex=0; %>
+                        <% vpnUsers.forEach((user, idx)=> { %>
+                            <% const teamId=user.idTeam || 'no-team' ; %>
+                                <% const teamName=(user.userTeam && user.userTeam.name) ? user.userTeam.name : 'No Team'
+                                    ; %>
 
-                                            <% if (prevTeamId !==teamId) { %>
-                                                <% prevTeamId=teamId; %>
-                                                    <% teamIndex++; %>
-                                                        <tr class="team-header"
-                                                            style="background-color: <%= teamIndex % 2 === 0 ? '#e8f4f8' : '#f0f4ff' %>; border-top: 3px solid #3498db;">
-                                                            <td colspan="5"
-                                                                style="padding: 12px; font-weight: 700; font-size: 14px; color: #2c3e50;">
-                                                                👥 Team: <span style="color: #3498db;">
-                                                                    <%= teamName %>
+                                    <% if (prevTeamId !==teamId) { %>
+                                        <% prevTeamId=teamId; %>
+                                            <% teamIndex++; %>
+                                                <tr class="team-header"
+                                                    style="background-color: <%= teamIndex % 2 === 0 ? '#e8f4f8' : '#f0f4ff' %>; border-top: 3px solid #3498db;">
+                                                    <td colspan="6"
+                                                        style="padding: 12px; font-weight: 700; font-size: 14px; color: #2c3e50;">
+                                                        👥 Team: <span style="color: #3498db;">
+                                                            <%= teamName %>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+
+                                                    <tr
+                                                        style="background-color: <%= teamIndex % 2 === 0 ? '#f8fbfc' : '#f9fbfe' %>; border-left: 3px solid transparent;">
+                                                        <td style="font-weight: 600; padding: 12px 12px 12px 18px;">
+                                                            <%= user.idUser %>
+                                                        </td>
+                                                        <td style="font-weight: 500;">
+                                                            <%= (user.user && user.user.username) ? user.user.username :
+                                                                (user.username || 'N/A' ) %>
+                                                        </td>
+                                                        <td style="color: #7f8c8d; font-size: 13px;">
+                                                            <%= (user.user && user.user.email) ? user.user.email :
+                                                                (user.email || 'N/A' ) %>
+                                                        </td>
+                                                        <td>
+                                                            <% if (user.ipVpn) { %>
+                                                                <span style="font-family: monospace; font-weight: 500;">
+                                                                    <%= user.ipVpn %>
                                                                 </span>
-                                                            </td>
-                                                        </tr>
-                                                        <% } %>
-
-                                                            <tr
-                                                                style="background-color: <%= teamIndex % 2 === 0 ? '#f8fbfc' : '#f9fbfe' %>; border-left: 3px solid transparent;">
-                                                                <td
-                                                                    style="font-weight: 600; padding: 12px 12px 12px 18px;">
-                                                                    <%= user.idUser %>
-                                                                </td>
-                                                                <td style="font-weight: 500;">
-                                                                    <%= (user.user && user.user.username) ?
-                                                                        user.user.username : (user.username || 'N/A' )
-                                                                        %>
-                                                                </td>
-                                                                <td style="color: #7f8c8d; font-size: 13px;">
-                                                                    <%= (user.user && user.user.email) ? user.user.email
-                                                                        : (user.email || 'N/A' ) %>
-                                                                </td>
-                                                                <td>
-                                                                    <% if (user.path) { %>
-                                                                        <button class="btn-download"
-                                                                            onclick="downloadVpnConfig(<%= user.id %>, 'user')"
-                                                                            title="Download VPN Config">📥
-                                                                            Download</button>
-                                                                        <% } else { %>
-                                                                            <span style="color: #bdc3c7;">Not
-                                                                                generated</span>
-                                                                            <% } %>
-                                                                </td>
-                                                                <td>
-                                                                    <% const status=user.statusVpn || 'Inactive' ; %>
-                                                                        <span
-                                                                            class="badge-status <%= status.toLowerCase() %>">
-                                                                            <% if (status.toLowerCase() === 'active' || status.toLowerCase() === 'online') { %>
-                                                                                🟢 Online
-                                                                            <% } else if (status.toLowerCase() === 'offline') { %>
-                                                                                🔴 Offline
-                                                                            <% } else if (status.toLowerCase() === 'pending') { %>
+                                                                <% } else { %>
+                                                                    <span style="color: #bdc3c7;">N/A</span>
+                                                                    <% } %>
+                                                        </td>
+                                                        <td>
+                                                            <% if (user.path) { %>
+                                                                <button class="btn-download"
+                                                                    onclick="downloadVpnConfig(<%= user.id %>, 'user')"
+                                                                    title="Download VPN Config">📥
+                                                                    Download</button>
+                                                                <% } else { %>
+                                                                    <span style="color: #bdc3c7;">Not
+                                                                        generated</span>
+                                                                    <% } %>
+                                                        </td>
+                                                        <td>
+                                                            <% const status=user.statusVpn || 'Inactive' ; %>
+                                                                <span class="badge-status <%= status.toLowerCase() %>">
+                                                                    <% if (status.toLowerCase()==='active' ||
+                                                                        status.toLowerCase()==='online' ) { %>
+                                                                        🟢 Online
+                                                                        <% } else if (status.toLowerCase()==='offline' )
+                                                                            { %>
+                                                                            🔴 Offline
+                                                                            <% } else if
+                                                                                (status.toLowerCase()==='pending' ) { %>
                                                                                 🟡 Pending
-                                                                            <% } else { %>
-                                                                                ⚫ Inactive
-                                                                            <% } %>
-                                                                        </span>
-                                                                </td>
-                                                            </tr>
-                                                            <% }) %>
-                    </tbody>
-                </table>
-                <% } else { %>
-                    <p>No VPN users configured yet.</p>
-                    <% } %>
-        </div>
+                                                                                <% } else { %>
+                                                                                    ⚫ Inactive
+                                                                                    <% } %>
+                                                                </span>
+                                                        </td>
+                                                    </tr>
+                                                    <% }) %>
+            </tbody>
+        </table>
+        <% } else { %>
+            <p>No VPN users configured yet.</p>
+            <% } %>
+</div>
 
-        <style>
-            .badge {
-                display: inline-block;
-                padding: 4px 12px;
-                border-radius: 12px;
-                font-size: 12px;
-                font-weight: 600;
-            }
+<style>
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
 
-            .badge-success {
-                background: #d5f4e6;
-                color: #27ae60;
-            }
+    .badge-success {
+        background: #d5f4e6;
+        color: #27ae60;
+    }
 
-            .badge-type {
-                display: inline-block;
-                padding: 6px 12px;
-                border-radius: 6px;
-                font-size: 12px;
-                font-weight: 600;
-                white-space: nowrap;
-            }
+    .badge-type {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
 
-            .badge-type.vuln {
-                background: #ffe5e5;
-                color: #c0392b;
-            }
+    .badge-type.vuln {
+        background: #ffe5e5;
+        color: #c0392b;
+    }
 
-            .badge-type.test {
-                background: #e5f1ff;
-                color: #1e5fb8;
-            }
+    .badge-type.test {
+        background: #e5f1ff;
+        color: #1e5fb8;
+    }
 
-            .badge-status {
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                padding: 8px 14px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: 700;
-                white-space: nowrap;
-                letter-spacing: 0.5px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                transition: all 0.3s ease;
-                text-transform: capitalize;
-            }
+    .badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        text-transform: capitalize;
+    }
 
-            .badge-status::before {
-                content: '';
-                width: 10px;
-                height: 10px;
-                border-radius: 50%;
-                display: inline-block;
-                animation: pulse 2s infinite;
-            }
+    .badge-status::before {
+        content: '';
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        animation: pulse 2s infinite;
+    }
 
-            @keyframes pulse {
-                0% {
-                    box-shadow: 0 0 0 0 currentColor;
-                    opacity: 1;
-                }
-                70% {
-                    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
-                    opacity: 0.7;
-                }
-                100% {
-                    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-                    opacity: 0;
-                }
-            }
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 currentColor;
+            opacity: 1;
+        }
 
-            .badge-status:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            }
+        70% {
+            box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+            opacity: 0.7;
+        }
 
-            .badge-status.active {
-                background: linear-gradient(135deg, #d4edda 0%, #c1e9d6 100%);
-                color: #0d5e24;
-                border: 2px solid #28a745;
-            }
+        100% {
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            opacity: 0;
+        }
+    }
 
-            .badge-status.active::before {
-                background-color: #28a745;
-                box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.2);
-            }
+    .badge-status:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
 
-            .badge-status.offline,
-            .badge-status.inactive {
-                background: linear-gradient(135deg, #f8d7da 0%, #f5c9cf 100%);
-                color: #721c24;
-                border: 2px solid #dc3545;
-            }
+    .badge-status.active {
+        background: linear-gradient(135deg, #d4edda 0%, #c1e9d6 100%);
+        color: #0d5e24;
+        border: 2px solid #28a745;
+    }
 
-            .badge-status.offline::before,
-            .badge-status.inactive::before {
-                background-color: #dc3545;
-                box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.2);
-                animation: pulse 1.5s infinite;
-            }
+    .badge-status.active::before {
+        background-color: #28a745;
+        box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.2);
+    }
 
-            .badge-status.online {
-                background: linear-gradient(135deg, #d4edda 0%, #c1e9d6 100%);
-                color: #0d5e24;
-                border: 2px solid #28a745;
-            }
+    .badge-status.offline,
+    .badge-status.inactive {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c9cf 100%);
+        color: #721c24;
+        border: 2px solid #dc3545;
+    }
 
-            .badge-status.online::before {
-                background-color: #28a745;
-                box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.2);
-                animation: pulse 1s infinite;
-            }
+    .badge-status.offline::before,
+    .badge-status.inactive::before {
+        background-color: #dc3545;
+        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.2);
+        animation: pulse 1.5s infinite;
+    }
 
-            .badge-status.pending {
-                background: linear-gradient(135deg, #fff3cd 0%, #ffe8a1 100%);
-                color: #663c00;
-                border: 2px solid #ffc107;
-            }
+    .badge-status.online {
+        background: linear-gradient(135deg, #d4edda 0%, #c1e9d6 100%);
+        color: #0d5e24;
+        border: 2px solid #28a745;
+    }
 
-            .badge-status.pending::before {
-                background-color: #ffc107;
-                box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.2);
-                animation: pulse 2.5s infinite;
-            }
+    .badge-status.online::before {
+        background-color: #28a745;
+        box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.2);
+        animation: pulse 1s infinite;
+    }
 
-            .team-header {
-                font-weight: 700 !important;
-            }
+    .badge-status.pending {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffe8a1 100%);
+        color: #663c00;
+        border: 2px solid #ffc107;
+    }
 
-            .team-header td {
-                letter-spacing: 0.5px;
-            }
+    .badge-status.pending::before {
+        background-color: #ffc107;
+        box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.2);
+        animation: pulse 2.5s infinite;
+    }
 
-            .btn {
-                padding: 8px 16px;
-                background: #3498db;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 14px;
-            }
+    .team-header {
+        font-weight: 700 !important;
+    }
 
-            .btn:hover {
-                background: #2980b9;
-            }
+    .team-header td {
+        letter-spacing: 0.5px;
+    }
 
-            .btn-small {
-                padding: 4px 8px;
-                font-size: 12px;
-            }
+    .btn {
+        padding: 8px 16px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
 
-            .btn:disabled {
-                background: #95a5a6;
-                cursor: not-allowed;
-            }
+    .btn:hover {
+        background: #2980b9;
+    }
 
-            .table {
-                width: 100%;
-                border-collapse: separate;
-                border-spacing: 0 8px;
-                margin-top: 10px;
-            }
+    .btn-small {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
 
-            .table th,
-            .table td {
-                padding: 12px;
-                text-align: left;
-                border-bottom: 1px solid #ddd;
-            }
+    .btn:disabled {
+        background: #95a5a6;
+        cursor: not-allowed;
+    }
 
-            .table th {
-                background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
-                font-weight: 700;
-                color: #2c3e50;
-                padding: 15px 12px;
-                font-size: 13px;
-                letter-spacing: 0.5px;
-                text-transform: uppercase;
-                border-bottom: 3px solid #3498db;
-            }
+    .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        margin-top: 10px;
+    }
 
-            .table tbody tr {
-                transition: all 0.3s ease;
-            }
+    .table th,
+    .table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
 
-            .table tbody tr:hover {
-                box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
-            }
+    .table th {
+        background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
+        font-weight: 700;
+        color: #2c3e50;
+        padding: 15px 12px;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        border-bottom: 3px solid #3498db;
+    }
 
-            .btn-download {
-                padding: 6px 12px;
-                background: #27ae60;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 13px;
-                transition: background 0.2s;
-            }
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
 
-            .btn-download:hover {
-                background: #229954;
-            }
+    .table tbody tr:hover {
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
+    }
 
-            .btn-download:active {
-                transform: scale(0.98);
-            }
-        </style>
+    .btn-download {
+        padding: 6px 12px;
+        background: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: background 0.2s;
+    }
 
-        <script>
-            let isGenerating = false;
+    .btn-download:hover {
+        background: #229954;
+    }
 
-            // Toast notification system
-            function showToast(message, type = 'info', duration = 5000) {
-                const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-                const id = Math.random().toString(36).substr(2, 9);
-                toast.id = id;
+    .btn-download:active {
+        transform: scale(0.98);
+    }
+</style>
 
-                let bgColor, borderColor, icon;
-                switch (type) {
-                    case 'error':
-                        bgColor = '#f8d7da';
-                        borderColor = '#f5c6cb';
-                        icon = '✗';
-                        break;
-                    case 'warning':
-                        bgColor = '#fff3cd';
-                        borderColor = '#ffeeba';
-                        icon = '⚠';
-                        break;
-                    case 'success':
-                        bgColor = '#d4edda';
-                        borderColor = '#c3e6cb';
-                        icon = '✓';
-                        break;
-                    default:
-                        bgColor = '#d1ecf1';
-                        borderColor = '#bee5eb';
-                        icon = 'ℹ';
-                }
+<script>
+    let isGenerating = false;
 
-                toast.style.cssText = `
+    // Toast notification system
+    function showToast(message, type = 'info', duration = 5000) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const id = Math.random().toString(36).substr(2, 9);
+        toast.id = id;
+
+        let bgColor, borderColor, icon;
+        switch (type) {
+            case 'error':
+                bgColor = '#f8d7da';
+                borderColor = '#f5c6cb';
+                icon = '✗';
+                break;
+            case 'warning':
+                bgColor = '#fff3cd';
+                borderColor = '#ffeeba';
+                icon = '⚠';
+                break;
+            case 'success':
+                bgColor = '#d4edda';
+                borderColor = '#c3e6cb';
+                icon = '✓';
+                break;
+            default:
+                bgColor = '#d1ecf1';
+                borderColor = '#bee5eb';
+                icon = 'ℹ';
+        }
+
+        toast.style.cssText = `
                     background: ${bgColor};
                     border: 1px solid ${borderColor};
                     padding: 12px 16px;
@@ -460,204 +490,204 @@
                     word-wrap: break-word;
                     max-width: 100%;
                 `;
-                toast.innerHTML = `<strong style="margin-right: 8px;">${icon}</strong>${message}`;
+        toast.innerHTML = `<strong style="margin-right: 8px;">${icon}</strong>${message}`;
 
-                container.appendChild(toast);
+        container.appendChild(toast);
 
-                if (duration > 0) {
-                    setTimeout(() => {
-                        toast.style.animation = 'slideOut 0.3s ease-in-out';
-                        setTimeout(() => toast.remove(), 300);
-                    }, duration);
+        if (duration > 0) {
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-in-out';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+    }
+
+    // Parse Python output for errors, warnings, success
+    function parseAndNotifyOutput(output) {
+        const lines = output.split('\n');
+        const errors = [];
+        const warnings = [];
+        const successes = [];
+
+        lines.forEach(line => {
+            const trimmed = line.trim();
+            if (trimmed.includes('✗')) {
+                errors.push(trimmed.replace('✗', '').trim());
+            } else if (trimmed.includes('⚠')) {
+                warnings.push(trimmed.replace('⚠', '').trim());
+            } else if (trimmed.includes('✓')) {
+                successes.push(trimmed.replace('✓', '').trim());
+            }
+        });
+
+        // Show errors first
+        errors.forEach(error => {
+            if (error.length > 0) {
+                showToast(error, 'error', 7000);
+            }
+        });
+
+        // Show warnings
+        warnings.forEach(warning => {
+            if (warning.length > 0) {
+                showToast(warning, 'warning', 6000);
+            }
+        });
+
+        // Show last success message
+        if (successes.length > 0) {
+            const lastSuccess = successes[successes.length - 1];
+            if (lastSuccess.length > 0) {
+                showToast(lastSuccess, 'success', 5000);
+            }
+        }
+    }
+
+    async function generateVpnTeamsVulnbox() {
+        await runVpnGeneration('/admin/vpn/generate-teams-vulnbox', 'vulnbox teams');
+    }
+
+    async function generateVpnTeamsTestbox() {
+        await runVpnGeneration('/admin/vpn/generate-teams-testbox', 'testbox teams');
+    }
+
+    async function generateVpnUsers() {
+        await runVpnGeneration('/admin/vpn/generate-users', 'users');
+    }
+
+    async function runVpnGeneration(endpoint, label) {
+        if (isGenerating) {
+            showToast('Generation already in progress. Please wait.', 'warning', 5000);
+            return;
+        }
+
+        isGenerating = true;
+        const outputDiv = document.getElementById('vpn-output');
+        const outputText = document.getElementById('vpn-output-text');
+
+        outputDiv.style.display = 'block';
+        outputText.textContent = `Generating ${label} VPN configurations...\n`;
+        showToast(`Starting VPN generation for ${label}...`, 'info', 3000);
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                outputText.textContent += `\n✓ ${data.message}\n`;
+                outputText.textContent += `\n${data.output}`;
+
+                // Parse and show messages
+                parseAndNotifyOutput(data.output);
+
+                // Reload page after 2 seconds to refresh tables
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                outputText.textContent += `\n✗ Error: ${data.message}\n`;
+                outputText.textContent += `\n${data.error}`;
+
+                // Show error notifications
+                showToast(`VPN generation failed: ${data.message}`, 'error', 7000);
+                parseAndNotifyOutput(data.error);
+            }
+        } catch (error) {
+            outputText.textContent += `\n✗ Request failed: ${error.message}\n`;
+            showToast(`Request failed: ${error.message}`, 'error', 7000);
+        } finally {
+            isGenerating = false;
+        }
+    }
+
+    function clearVpnOutput() {
+        document.getElementById('vpn-output').style.display = 'none';
+        document.getElementById('vpn-output-text').textContent = '';
+    }
+
+    async function testEnvironment() {
+        showToast('Testing environment...', 'info', 3000);
+        try {
+            const response = await fetch('/admin/vpn/test-environment', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            const outputDiv = document.getElementById('vpn-output');
+            const outputText = document.getElementById('vpn-output-text');
+
+            outputDiv.style.display = 'block';
+            outputText.textContent = '[Environment Test Results]\n';
+            outputText.textContent += `✓ Script Exists: ${data.scriptExists ? 'YES' : 'NO'}\n`;
+            outputText.textContent += `✓ .env Exists: ${data.envExists ? 'YES' : 'NO'}\n`;
+            outputText.textContent += `✓ Python Available: ${data.pythonAvailable ? 'YES' : 'NO'}\n`;
+            outputText.textContent += `✓ Python Version: ${data.pythonVersion.trim()}\n`;
+            outputText.textContent += `✓ Working Directory: ${data.cwd}\n`;
+            outputText.textContent += `✓ Timestamp: ${data.timestamp}\n`;
+
+            const allGood = data.scriptExists && data.envExists && data.pythonAvailable;
+            if (allGood) {
+                showToast('✓ All environment checks passed!', 'success', 5000);
+            } else {
+                showToast('⚠ Some environment checks failed', 'warning', 5000);
+            }
+        } catch (error) {
+            showToast(`Test failed: ${error.message}`, 'error', 7000);
+        }
+    }
+
+    async function downloadVpnConfig(vpnId, type) {
+        try {
+            const response = await fetch(`/admin/download-vpn/${vpnId}/${type}`, {
+                method: 'GET'
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                showToast(data.error || 'Download failed', 'error', 5000);
+                return;
+            }
+
+            // Get filename from response headers
+            const contentDisposition = response.headers.get('content-disposition');
+            let filename = 'vpn-config.conf';
+            if (contentDisposition) {
+                const filenamePart = contentDisposition.split('filename=');
+                if (filenamePart.length > 1) {
+                    filename = filenamePart[1].replace(/"/g, '').split(';')[0];
                 }
             }
 
-            // Parse Python output for errors, warnings, success
-            function parseAndNotifyOutput(output) {
-                const lines = output.split('\n');
-                const errors = [];
-                const warnings = [];
-                const successes = [];
+            // Download file
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
 
-                lines.forEach(line => {
-                    const trimmed = line.trim();
-                    if (trimmed.includes('✗')) {
-                        errors.push(trimmed.replace('✗', '').trim());
-                    } else if (trimmed.includes('⚠')) {
-                        warnings.push(trimmed.replace('⚠', '').trim());
-                    } else if (trimmed.includes('✓')) {
-                        successes.push(trimmed.replace('✓', '').trim());
-                    }
-                });
+            showToast(`✓ File downloaded: ${filename}`, 'success', 4000);
+        } catch (error) {
+            showToast(`Download error: ${error.message}`, 'error', 5000);
+            console.error('Download error:', error);
+        }
+    }
 
-                // Show errors first
-                errors.forEach(error => {
-                    if (error.length > 0) {
-                        showToast(error, 'error', 7000);
-                    }
-                });
-
-                // Show warnings
-                warnings.forEach(warning => {
-                    if (warning.length > 0) {
-                        showToast(warning, 'warning', 6000);
-                    }
-                });
-
-                // Show last success message
-                if (successes.length > 0) {
-                    const lastSuccess = successes[successes.length - 1];
-                    if (lastSuccess.length > 0) {
-                        showToast(lastSuccess, 'success', 5000);
-                    }
-                }
-            }
-
-            async function generateVpnTeamsVulnbox() {
-                await runVpnGeneration('/admin/vpn/generate-teams-vulnbox', 'vulnbox teams');
-            }
-
-            async function generateVpnTeamsTestbox() {
-                await runVpnGeneration('/admin/vpn/generate-teams-testbox', 'testbox teams');
-            }
-
-            async function generateVpnUsers() {
-                await runVpnGeneration('/admin/vpn/generate-users', 'users');
-            }
-
-            async function runVpnGeneration(endpoint, label) {
-                if (isGenerating) {
-                    showToast('Generation already in progress. Please wait.', 'warning', 5000);
-                    return;
-                }
-
-                isGenerating = true;
-                const outputDiv = document.getElementById('vpn-output');
-                const outputText = document.getElementById('vpn-output-text');
-
-                outputDiv.style.display = 'block';
-                outputText.textContent = `Generating ${label} VPN configurations...\n`;
-                showToast(`Starting VPN generation for ${label}...`, 'info', 3000);
-
-                try {
-                    const response = await fetch(endpoint, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        outputText.textContent += `\n✓ ${data.message}\n`;
-                        outputText.textContent += `\n${data.output}`;
-
-                        // Parse and show messages
-                        parseAndNotifyOutput(data.output);
-
-                        // Reload page after 2 seconds to refresh tables
-                        setTimeout(() => {
-                            location.reload();
-                        }, 2000);
-                    } else {
-                        outputText.textContent += `\n✗ Error: ${data.message}\n`;
-                        outputText.textContent += `\n${data.error}`;
-
-                        // Show error notifications
-                        showToast(`VPN generation failed: ${data.message}`, 'error', 7000);
-                        parseAndNotifyOutput(data.error);
-                    }
-                } catch (error) {
-                    outputText.textContent += `\n✗ Request failed: ${error.message}\n`;
-                    showToast(`Request failed: ${error.message}`, 'error', 7000);
-                } finally {
-                    isGenerating = false;
-                }
-            }
-
-            function clearVpnOutput() {
-                document.getElementById('vpn-output').style.display = 'none';
-                document.getElementById('vpn-output-text').textContent = '';
-            }
-
-            async function testEnvironment() {
-                showToast('Testing environment...', 'info', 3000);
-                try {
-                    const response = await fetch('/admin/vpn/test-environment', {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    const data = await response.json();
-
-                    const outputDiv = document.getElementById('vpn-output');
-                    const outputText = document.getElementById('vpn-output-text');
-
-                    outputDiv.style.display = 'block';
-                    outputText.textContent = '[Environment Test Results]\n';
-                    outputText.textContent += `✓ Script Exists: ${data.scriptExists ? 'YES' : 'NO'}\n`;
-                    outputText.textContent += `✓ .env Exists: ${data.envExists ? 'YES' : 'NO'}\n`;
-                    outputText.textContent += `✓ Python Available: ${data.pythonAvailable ? 'YES' : 'NO'}\n`;
-                    outputText.textContent += `✓ Python Version: ${data.pythonVersion.trim()}\n`;
-                    outputText.textContent += `✓ Working Directory: ${data.cwd}\n`;
-                    outputText.textContent += `✓ Timestamp: ${data.timestamp}\n`;
-
-                    const allGood = data.scriptExists && data.envExists && data.pythonAvailable;
-                    if (allGood) {
-                        showToast('✓ All environment checks passed!', 'success', 5000);
-                    } else {
-                        showToast('⚠ Some environment checks failed', 'warning', 5000);
-                    }
-                } catch (error) {
-                    showToast(`Test failed: ${error.message}`, 'error', 7000);
-                }
-            }
-
-            async function downloadVpnConfig(vpnId, type) {
-                try {
-                    const response = await fetch(`/admin/download-vpn/${vpnId}/${type}`, {
-                        method: 'GET'
-                    });
-
-                    if (!response.ok) {
-                        const data = await response.json();
-                        showToast(data.error || 'Download failed', 'error', 5000);
-                        return;
-                    }
-
-                    // Get filename from response headers
-                    const contentDisposition = response.headers.get('content-disposition');
-                    let filename = 'vpn-config.conf';
-                    if (contentDisposition) {
-                        const filenamePart = contentDisposition.split('filename=');
-                        if (filenamePart.length > 1) {
-                            filename = filenamePart[1].replace(/"/g, '').split(';')[0];
-                        }
-                    }
-
-                    // Download file
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-
-                    showToast(`✓ File downloaded: ${filename}`, 'success', 4000);
-                } catch (error) {
-                    showToast(`Download error: ${error.message}`, 'error', 5000);
-                    console.error('Download error:', error);
-                }
-            }
-
-            // Add CSS animations
-            const style = document.createElement('style');
-            style.textContent = `
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
                 @keyframes slideIn {
                     from {
                         transform: translateX(400px);
@@ -679,6 +709,6 @@
                     }
                 }
             `;
-            document.head.appendChild(style);
-        </script>
+    document.head.appendChild(style);
+</script>
 </div>

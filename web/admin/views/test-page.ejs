@@ -1,121 +1,234 @@
 <div class="dashboard">
     <%- include('_taskbar', { currentTab: 'test' }) %>
 
-        <div class="section-header">
-            <h2>Test & Diagnostics</h2>
-            <p class="section-subtitle">Test various system components</p>
+        <div class="section-header enhanced">
+            <div class="header-content">
+                <div class="header-icon pro-icon test-icon">TST</div>
+                <div class="header-text">
+                    <h2>Test & Diagnostics</h2>
+                    <p class="section-subtitle">Run system diagnostic tests</p>
+                </div>
+            </div>
+            <div class="header-divider"></div>
         </div>
 
-        <% if (typeof error !=='undefined' && error) { %>
-            <div class="alert alert-error">
-                <%= error %>
+        <div class="dashboard-section">
+            <h3>System Tests</h3>
+            <div class="test-buttons">
+                <button class="btn btn-test btn-wireguard" onclick="runTest('wireguard')">
+                    <span class="btn-icon">🔒</span>
+                    Test Wireguard
+                </button>
+                <button class="btn btn-test btn-services" onclick="runTest('connectivity')">
+                    <span class="btn-icon">🌐</span>
+                    Services Connectivity
+                </button>
             </div>
-            <% } %>
+        </div>
 
-                <div class="dashboard-section">
-                    <h3>System Health Check</h3>
-                    <div class="test-items">
-                        <div class="test-item">
-                            <span class="test-label">Database Connection</span>
-                            <span class="test-status <%= testResults.database ? 'success' : 'failed' %>">
-                                <%= testResults.database ? '✓ OK' : '✗ Failed' %>
-                            </span>
-                        </div>
-                        <div class="test-item">
-                            <span class="test-label">API Endpoints</span>
-                            <span class="test-status <%= testResults.api ? 'success' : 'failed' %>">
-                                <%= testResults.api ? '✓ OK' : '✗ Failed' %>
-                            </span>
-                        </div>
-                        <div class="test-item">
-                            <span class="test-label">Session Manager</span>
-                            <span class="test-status <%= testResults.session ? 'success' : 'failed' %>">
-                                <%= testResults.session ? '✓ OK' : '✗ Failed' %>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-section">
-                    <h3>Diagnostics Tools</h3>
-                    <button class="btn btn-primary" onclick="runDiagnostics()">Run Full Diagnostics</button>
-                    <button class="btn btn-secondary" onclick="viewLogs()">View System Logs</button>
-                </div>
+        <div class="dashboard-section">
+            <h3>Test Output</h3>
+            <div class="log-container" id="logContainer">
+                <div class="log-empty">Waiting for test execution...</div>
+            </div>
+        </div>
 </div>
 
 <style>
-    .test-items {
-        display: flex;
-        flex-direction: column;
+    .test-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 15px;
-    }
-
-    .test-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 5px;
-    }
-
-    .test-label {
-        font-weight: 600;
-        color: #2c3e50;
-    }
-
-    .test-status {
-        font-weight: 600;
-        padding: 4px 12px;
-        border-radius: 12px;
-    }
-
-    .test-status.success {
-        background: #d5f4e6;
-        color: #27ae60;
-    }
-
-    .test-status.failed {
-        background: #fadbd8;
-        color: #c0392b;
+        margin-bottom: 20px;
     }
 
     .btn {
-        padding: 10px 20px;
+        padding: 12px 16px;
         border: none;
-        border-radius: 5px;
+        border-radius: 6px;
         cursor: pointer;
         font-weight: 600;
-        transition: background 0.3s;
-        margin-right: 10px;
-        margin-bottom: 10px;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center;
     }
 
-    .btn-primary {
-        background: #3498db;
+    .btn-test {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     }
 
-    .btn-primary:hover {
-        background: #2980b9;
+    .btn-test:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
     }
 
-    .btn-secondary {
-        background: #95a5a6;
-        color: white;
+    .btn-test:active {
+        transform: translateY(0);
     }
 
-    .btn-secondary:hover {
-        background: #7f8c8d;
+    .btn-test:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-icon {
+        font-size: 16px;
+    }
+
+    .log-container {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        border-radius: 6px;
+        padding: 16px;
+        font-family: 'Monaco', 'Courier New', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        height: 500px;
+        overflow-y: auto;
+        border: 1px solid #3e3e42;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .log-empty {
+        color: #858585;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .log-line {
+        margin: 4px 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .log-timestamp {
+        color: #858585;
+        margin-right: 8px;
+        min-width: 120px;
+    }
+
+    .log-level-info {
+        color: #4ec9b0;
+    }
+
+    .log-level-success {
+        color: #6a9955;
+    }
+
+    .log-level-warning {
+        color: #dcdcaa;
+    }
+
+    .log-level-error {
+        color: #f48771;
+    }
+
+    .log-message {
+        flex: 1;
+        word-break: break-word;
+    }
+
+    .log-divider {
+        color: #3e3e42;
+        margin: 12px 0;
+    }
+
+    /* Scrollbar styling */
+    .log-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .log-container::-webkit-scrollbar-track {
+        background: #1e1e1e;
+    }
+
+    .log-container::-webkit-scrollbar-thumb {
+        background: #464647;
+        border-radius: 4px;
+    }
+
+    .log-container::-webkit-scrollbar-thumb:hover {
+        background: #5e5e5f;
     }
 </style>
 
 <script>
-    function runDiagnostics() {
-        alert('Running full diagnostics - Feature coming soon');
+    function runTest(testType) {
+        const logContainer = document.getElementById('logContainer');
+        const buttons = document.querySelectorAll('.btn-test');
+
+        // Disable all buttons
+        buttons.forEach(btn => btn.disabled = true);
+
+        // Clear and show loading
+        logContainer.innerHTML = '<div class="log-empty">⏳ Running test...</div>';
+
+        // Call the test endpoint
+        fetch(`/admin/test/${testType}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                displayLogs(data.logs, testType);
+            })
+            .catch(err => {
+                displayError(`Failed to run test: ${err.message}`);
+            })
+            .finally(() => {
+                buttons.forEach(btn => btn.disabled = false);
+            });
     }
 
-    function viewLogs() {
-        alert('View System Logs - Feature coming soon');
+    function displayLogs(logs, testType) {
+        const logContainer = document.getElementById('logContainer');
+        if (!logs || logs.length === 0) {
+            logContainer.innerHTML = '<div class="log-empty">No output</div>';
+            return;
+        }
+
+        let html = `<div class="log-line"><span class="log-timestamp">[${getCurrentTime()}]</span><span class="log-level-info">Test: ${testType}</span></div>`;
+        html += '<div class="log-divider">' + '─'.repeat(60) + '</div>';
+
+        // Display logs in chronological order (top to bottom, first to last)
+        for (let i = 0; i < logs.length; i++) {
+            const log = logs[i];
+            const timestamp = new Date().toLocaleTimeString();
+            const levelClass = `log-level-${log.level || 'info'}`;
+            const level = (log.level || 'INFO').toUpperCase();
+            html += `<div class="log-line"><span class="log-timestamp">[${timestamp}]</span><span class="${levelClass}">${level}</span><span class="log-message">${escapeHtml(log.message)}</span></div>`;
+        }
+
+        logContainer.innerHTML = html;
+        // Scroll to top to see the first logs
+        logContainer.scrollTop = 0;
+    }
+
+    function displayError(message) {
+        const logContainer = document.getElementById('logContainer');
+        html = `<div class="log-line"><span class="log-timestamp">[${getCurrentTime()}]</span><span class="log-level-error">ERROR</span><span class="log-message">${escapeHtml(message)}</span></div>`;
+        logContainer.innerHTML = html;
+    }
+
+    function getCurrentTime() {
+        return new Date().toLocaleTimeString();
+    }
+
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 </script>

@@ -1,0 +1,9 @@
+ attack | defense |        sla        |       total       | service_id | team_id | team_name |                    team_images                    | team_country | service_name 
+--------+---------+-------------------+-------------------+------------+---------+-----------+---------------------------------------------------+--------------+--------------
+      0 |       0 |                 0 |                 0 |          1 |      15 | N3m3s1s   | /uploads/teams/1774795902667-cfa0c7dbb8925332.jpg | VN           | dns
+      0 |       0 | 5.196152422706632 | 5.196152422706632 |          2 |      15 | N3m3s1s   | /uploads/teams/1774795902667-cfa0c7dbb8925332.jpg | VN           | dns1
+      0 |       0 |                 0 |                 0 |          5 |      15 | N3m3s1s   | /uploads/teams/1774795902667-cfa0c7dbb8925332.jpg | VN           | OOO
+      0 |       0 |                 0 |                 0 |          1 |      16 | La        | /uploads/teams/1774928574008-6cd625f04e39e003.png | VN           | dns
+      0 |       0 |                 0 |                 0 |          2 |      16 | La        | /uploads/teams/1774928574008-6cd625f04e39e003.png | VN           | dns1
+(5 rows)
+

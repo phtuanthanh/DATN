@@ -545,14 +545,17 @@ exports.getScoreboard = async (req, res) => {
     try {
         const sequelize = require('../config/database');
 
-        // Get current tick from competition
+        console.log('[SCOREBOARD] Request received for scoreboard data');
+
+        // Get current tick from scoring_gamecontrol (not competition)
         const competitionResult = await sequelize.query(`
             SELECT current_tick
-            FROM competition
+            FROM scoring_gamecontrol
             LIMIT 1
         `, { type: sequelize.QueryTypes.SELECT });
 
         const currentTick = competitionResult.length > 0 ? (competitionResult[0].current_tick || 0) : 0;
+        console.log('[SCOREBOARD] Current tick:', currentTick);
 
         // Get all services (not just those with scores)
         const allServicesResult = await sequelize.query(`
@@ -562,6 +565,7 @@ exports.getScoreboard = async (req, res) => {
         `, { type: sequelize.QueryTypes.SELECT });
 
         const services = allServicesResult.map(s => s.name);
+        console.log('[SCOREBOARD] Services found:', services.length, '-', services);
 
         // Get all scoreboard data with status
         const scoreboardData = await sequelize.query(`
@@ -582,7 +586,10 @@ exports.getScoreboard = async (req, res) => {
             ORDER BY ss.team_id ASC, ss.service_id ASC
         `, { type: sequelize.QueryTypes.SELECT });
 
+        console.log('[SCOREBOARD] Scoreboard data rows:', scoreboardData.length);
+
         if (!scoreboardData || scoreboardData.length === 0) {
+            console.log('[SCOREBOARD] No data in scoreboard, returning empty teams');
             return res.json({
                 teams: [],
                 services: services,
@@ -637,12 +644,8 @@ exports.getScoreboard = async (req, res) => {
             return team;
         }).sort((a, b) => b.totalScore - a.totalScore);
 
-        console.log('[SCOREBOARD] Services:', services);
-        console.log('[SCOREBOARD] Teams count:', teams.length);
-        console.log('[SCOREBOARD] Current tick:', currentTick);
-        if (teams.length > 0) {
-            console.log('[SCOREBOARD] Team 0 services:', JSON.stringify(teams[0].services));
-        }
+        console.log('[SCOREBOARD] Teams processed:', teams.length);
+        console.log('[SCOREBOARD] Sending response with', teams.length, 'teams and', services.length, 'services');
 
         res.json({
             teams,
@@ -650,9 +653,10 @@ exports.getScoreboard = async (req, res) => {
             latestTick: currentTick
         });
     } catch (error) {
-        console.error('Error fetching scoreboard:', error);
+        console.error('[SCOREBOARD] Error fetching scoreboard:', error);
         res.status(500).json({
-            error: 'Failed to fetch scoreboard data'
+            error: 'Failed to fetch scoreboard data',
+            details: error.message
         });
     }
 };

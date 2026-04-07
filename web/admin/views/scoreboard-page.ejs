@@ -393,9 +393,22 @@
         const tickDisplay = document.getElementById('tickDisplay');
         const tickValue = document.getElementById('tickValue');
 
+        console.log('[SCOREBOARD-FE] Fetching scoreboard data...');
+
         fetch('/admin/scoreboard-data')
-            .then(res => res.json())
+            .then(res => {
+                console.log('[SCOREBOARD-FE] Response status:', res.status);
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                return res.json();
+            })
             .then(data => {
+                console.log('[SCOREBOARD-FE] Response data:', JSON.stringify(data).substring(0, 200));
+                console.log('[SCOREBOARD-FE] Teams:', data.teams ? data.teams.length : 0);
+                console.log('[SCOREBOARD-FE] Services:', data.services ? data.services.length : 0);
+                console.log('[SCOREBOARD-FE] Latest tick:', data.latestTick);
+
                 // Update tick display
                 if (data.latestTick !== undefined && data.latestTick !== null) {
                     tickValue.textContent = data.latestTick;
@@ -403,11 +416,14 @@
                 }
 
                 if (!data.teams || data.teams.length === 0) {
+                    console.log('[SCOREBOARD-FE] No teams, showing empty state');
                     table.style.display = 'none';
                     statusMsg.style.display = 'block';
                     statusMsg.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-text">No teams in competition yet</div></div>';
                     return;
                 }
+
+                console.log('[SCOREBOARD-FE] Rendering', data.teams.length, 'teams');
 
                 statusMsg.style.display = 'none';
                 table.style.display = 'table';
@@ -472,8 +488,10 @@
                         </tr>
                     `;
                 }).join('');
+                console.log('[SCOREBOARD-FE] Rendered successfully');
             })
             .catch(err => {
+                console.error('[SCOREBOARD-FE] Fetch error:', err);
                 table.style.display = 'none';
                 statusMsg.style.display = 'block';
                 statusMsg.innerHTML = `<div style="color: #d32f2f; padding: 40px 20px; text-align: center;">❌ Error: ${err.message}</div>`;

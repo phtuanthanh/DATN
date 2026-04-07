@@ -165,7 +165,7 @@ func main() {
 	}
 	defer dbConn.Close()
 
-	// Keep timezone always UTC
+	// Keep timezone as UTC - web frontend handles VN display
 	if _, err := dbConn.Exec("SET TIME ZONE 'UTC'"); err != nil {
 		log.Printf("[ERROR] Could not set timezone: %v", err)
 		os.Exit(1)

@@ -13,6 +13,7 @@ var (
 	ErrDBData           = errors.New("game control information has not been configured")
 	ErrDuplicateCapture = errors.New("duplicate capture")
 	ErrTeamNotExisting  = errors.New("team not existing")
+	ErrCompetitionEnded = errors.New("competition has already ended")
 )
 
 func GetStaticInfo(db *sql.DB) (competitionName, flagPrefix string, err error) {
@@ -61,6 +62,16 @@ func AddCapture(db *sql.DB, flagID uint32, capturingTeamNetNo int) error {
 		return err
 	}
 	defer tx.Rollback()
+
+	// Check if competition has ended
+	var endNull sql.NullTime
+	err = tx.QueryRow(`SELECT "end" FROM scoring_gamecontrol LIMIT 1`).Scan(&endNull)
+	if err != nil {
+		return err
+	}
+	if endNull.Valid && !time.Now().UTC().Before(endNull.Time.UTC()) {
+		return ErrCompetitionEnded
+	}
 
 	var teamID int
 	err = tx.QueryRow(`SELECT id FROM teams WHERE net = $1`, capturingTeamNetNo).Scan(&teamID)

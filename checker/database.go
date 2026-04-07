@@ -15,6 +15,9 @@ import (
 // ErrDBDataError tương đương với exceptions.DBDataError trong Python
 var ErrDBDataError = errors.New("invalid database state")
 
+// ErrCompetitionEnded indicates that the competition has already ended
+var ErrCompetitionEnded = errors.New("competition has already ended")
+
 // --- Cấu trúc dữ liệu trả về ---
 
 type ControlInfo struct {
@@ -313,6 +316,16 @@ func CommitResult(db *sql.DB, serviceID int, teamNetNo int, tick int, result int
 		return err
 	}
 	defer tx.Rollback()
+
+	// Check if competition has ended
+	var endNull sql.NullTime
+	err = tx.QueryRow(`SELECT "end" FROM scoring_gamecontrol LIMIT 1`).Scan(&endNull)
+	if err != nil {
+		return err
+	}
+	if endNull.Valid && !time.Now().UTC().Before(endNull.Time.UTC()) {
+		return ErrCompetitionEnded
+	}
 
 	teamIDPtr, err := netNoToTeamID(tx, teamNetNo, fakeTeamID)
 	if err != nil {

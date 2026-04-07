@@ -12,29 +12,34 @@ const parseDate = (dateStr) => {
 };
 
 /**
- * Format date to Flatpickr format (dd/mm/yyyy HH:mm)
- * @param {Date} date - Date to format
+ * Format date to Flatpickr format (dd/mm/yyyy HH:mm) in Vietnam timezone
+ * @param {Date} date - Date to format (in UTC from database)
  * @returns {string} Formatted date string
  */
 const formatDateToPicker = (date) => {
     if (!date) return '';
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
+    // Convert from UTC to Vietnam time (UTC+7)
+    const VN_TIMEZONE_OFFSET_MS = 7 * 60 * 60 * 1000;
+    const vnDate = new Date(new Date(date).getTime() + VN_TIMEZONE_OFFSET_MS);
+    const day = String(vnDate.getUTCDate()).padStart(2, '0');
+    const month = String(vnDate.getUTCMonth() + 1).padStart(2, '0');
+    const year = vnDate.getUTCFullYear();
+    const hours = String(vnDate.getUTCHours()).padStart(2, '0');
+    const minutes = String(vnDate.getUTCMinutes()).padStart(2, '0');
     return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
 
 /**
- * Format date to readable string
- * @param {Date} date - Date to format
- * @returns {string} Formatted date string for display
+ * Format date to readable string (displays Vietnam timezone UTC+7)
+ * @param {Date} date - Date to format (in UTC from database)
+ * @returns {string} Formatted date string for display in Vietnam time
  */
 const formatDateDisplay = (date) => {
     if (!date) return 'Not set';
-    return new Date(date).toLocaleString('vi-VN', {
+    // Convert from UTC to Vietnam time (UTC+7)
+    const VN_TIMEZONE_OFFSET_MS = 7 * 60 * 60 * 1000;
+    const vnDate = new Date(new Date(date).getTime() + VN_TIMEZONE_OFFSET_MS);
+    return vnDate.toLocaleString('vi-VN', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -291,14 +296,14 @@ const updateCompetition = async (data) => {
             };
         }
 
-        // Parse dates
+        // Parse dates from admin input (assumed to be Vietnam time)
         const servicesPublicDate = parseDate(data.services_public);
         const startDate = parseDate(data.start);
         const endDate = parseDate(data.end);
         const tickDuration = parseInt(data.tick_duration);
 
-        // Convert from Vietnam timezone (UTC+7) to UTC for database
-        const VN_TIMEZONE_OFFSET_MS = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+        // Convert from Vietnam timezone (UTC+7) to UTC for database storage
+        const VN_TIMEZONE_OFFSET_MS = 7 * 60 * 60 * 1000; // 7 hours
         const servicesPublicDateUTC = new Date(servicesPublicDate.getTime() - VN_TIMEZONE_OFFSET_MS);
         const startDateUTC = new Date(startDate.getTime() - VN_TIMEZONE_OFFSET_MS);
         const endDateUTC = new Date(endDate.getTime() - VN_TIMEZONE_OFFSET_MS);

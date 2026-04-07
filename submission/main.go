@@ -474,6 +474,13 @@ func handleTeamConnection(conn net.Conn, dbConn *sql.DB, params runtimeParams, c
 			continue
 		}
 
+		if errors.Is(err, ErrCompetitionEnded) {
+			_, _ = conn.Write([]byte("Competition has already ended\n"))
+			logWithClient("WARNING", "Flag %q rejected because competition has ended", line)
+			params.metrics.flagsErr.WithLabelValues(teamLabel).Inc()
+			continue
+		}
+
 		return &KillServerError{Err: err}
 	}
 

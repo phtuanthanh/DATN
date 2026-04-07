@@ -59,7 +59,7 @@ func main() {
 	}
 	log.Println("Established database connection")
 
-	// Set Timezone
+	// Keep timezone as UTC - web frontend handles VN display
 	if _, err := dbConn.Exec(`SET TIME ZONE 'UTC'`); err != nil {
 		log.Fatalf("[ERROR] Failed to set timezone: %v", err)
 	}
@@ -156,26 +156,35 @@ func mainLoopStep(ctx context.Context, dbConn *sql.DB, m *Metrics, scoringLock *
 		return
 	}
 
-	if !nonstop && (now.After(controlInfo.End) || now.Equal(controlInfo.End)) {
+	if !nonstop && !now.Before(controlInfo.End) {
 		CancelChecks(ctx, dbConn)
-		CalculateScoreboard(ctx, dbConn) // Update lần cuối
-
-		log.Println("Competition is already over")
+		log.Println("========== END COMPETITION ==========")
 		sleep(60 * time.Second)
 		return
 	}
 
 	if getSleepSeconds(controlInfo, m, now) <= 0 {
-		// Check if the next tick would go beyond competition end time
+		// Check if next tick would go beyond competition end time
 		nextTickStartOffset := time.Duration((controlInfo.CurrentTick+1)*controlInfo.TickDuration) * time.Second
 		nextTickStart := controlInfo.Start.Add(nextTickStartOffset)
 
-		// If next tick start is after or at end time, don't increase tick when not in nonstop mode
-		if !nonstop && (nextTickStart.After(controlInfo.End) || nextTickStart.Equal(controlInfo.End)) {
-			log.Printf("Next tick would start at %v, which is at or after competition end time %v. Not increasing tick.", nextTickStart, controlInfo.End)
+		log.Printf("[DEBUG] Tick increment check - Current: %d, NextTickStart: %v, End: %v, Now: %v", controlInfo.CurrentTick, nextTickStart, controlInfo.End, now)
+
+		// If next tick start is at or after end time, don't increase tick
+		if !nonstop && !nextTickStart.Before(controlInfo.End) {
+			log.Printf("[CRITICAL] TICK INCREMENT BLOCKED - Next tick %d would start at %v, which is >= end time %v", controlInfo.CurrentTick+1, nextTickStart, controlInfo.End)
 			CancelChecks(ctx, dbConn)
-			CalculateScoreboard(ctx, dbConn) // Final update
-			log.Println("Competition is already over")
+			log.Println("========== END COMPETITION ==========")
+			sleep(60 * time.Second)
+			return
+		}
+
+		// Double-check: verify current time hasn't exceeded end time
+		nowCheck := time.Now().UTC()
+		if !nonstop && !nowCheck.Before(controlInfo.End) {
+			log.Printf("[CRITICAL] TIME EXCEEDED - Current time %v >= end time %v. Stopping immediately.", nowCheck, controlInfo.End)
+			CancelChecks(ctx, dbConn)
+			log.Println("========== END COMPETITION ==========")
 			sleep(60 * time.Second)
 			return
 		}
@@ -217,6 +226,7 @@ func calculateScoreboardInThread(ctx context.Context, dbConn *sql.DB, m *Metrics
 		defer lock.Unlock()
 
 		start := time.Now()
+		// TODO: Implement scoreboard calculation
 		CalculateScoreboard(ctx, dbConn)
 
 		duration := time.Since(start).Seconds()
